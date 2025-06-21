@@ -1,0 +1,1 @@
+{"type":"video","color":"blue","duration":5,"resolution":"640x480","command":"ffmpeg -f lavfi -i color=c=blue:size=640x480:duration=5 -c:v libx264 -t 5 -pix_fmt yuv420p sample-files/blue-video.mp4","note":"This is a placeholder. In record mode, this would be a real video file."}

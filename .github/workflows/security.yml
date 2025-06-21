@@ -1,0 +1,322 @@
+name: Security & Dependency Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run weekly security scans on Sundays at 3 AM UTC
+    - cron: '0 3 * * 0'
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # Dependency vulnerability scanning
+  security-scan:
+    name: Security Vulnerability Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd packages/media-sdk && npm ci
+          cd apps/bun-runtime && npm ci
+
+      - name: Run npm audit
+        run: |
+          echo "## NPM Audit Results" >> security-report.md
+          npm audit --audit-level moderate --json > audit-results.json || true
+          
+          if [ -s audit-results.json ]; then
+            echo "### Found vulnerabilities:" >> security-report.md
+            cat audit-results.json | jq -r '.vulnerabilities | to_entries[] | "- **\(.key)**: \(.value.severity) - \(.value.title)"' >> security-report.md
+          else
+            echo "✅ No vulnerabilities found" >> security-report.md
+          fi
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'
+        with:
+          fail-on-severity: moderate
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-report
+          path: |
+            security-report.md
+            audit-results.json
+          retention-days: 30
+
+  # CodeQL security analysis
+  codeql:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'typescript' ]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          config-file: ./.github/codeql/codeql-config.yml
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd packages/media-sdk && npm ci
+
+      - name: Build project
+        run: |
+          cd packages/media-sdk && npm run build
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+  # Secret scanning
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  # License compliance
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install license checker
+        run: npm install -g license-checker
+
+      - name: Check licenses
+        run: |
+          echo "## License Compliance Report" > license-report.md
+          echo "" >> license-report.md
+          
+          cd packages/media-sdk
+          npm ci
+          
+          echo "### Main Package Dependencies:" >> ../../license-report.md
+          license-checker --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;CC0-1.0" --excludePrivatePackages --markdown >> ../../license-report.md || {
+            echo "❌ License compliance issues found in main package" >> ../../license-report.md
+            license-checker --excludePrivatePackages --markdown >> ../../license-report.md
+          }
+          
+          cd ../apps/bun-runtime
+          npm ci
+          
+          echo "" >> ../../license-report.md
+          echo "### Runtime Package Dependencies:" >> ../../license-report.md
+          license-checker --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;CC0-1.0" --excludePrivatePackages --markdown >> ../../license-report.md || {
+            echo "❌ License compliance issues found in runtime package" >> ../../license-report.md
+            license-checker --excludePrivatePackages --markdown >> ../../license-report.md
+          }
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: license-report.md
+          retention-days: 90
+
+  # OWASP dependency check
+  owasp-scan:
+    name: OWASP Dependency Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'Media SDK'
+          path: '.'
+          format: 'ALL'
+          args: >
+            --enableRetired
+            --enableExperimental
+            --suppression .github/security/dependency-check-suppressions.xml
+
+      - name: Upload OWASP report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owasp-reports
+          path: reports/
+          retention-days: 30
+
+      - name: Upload SARIF to GitHub
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: reports/dependency-check-report.sarif
+
+  # Container security (if using Docker)
+  container-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    if: false # Enable when Docker images are added
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t media-sdk:latest .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'media-sdk:latest'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Security summary and notification
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [security-scan, codeql, secret-scan, license-check, owasp-scan]
+    if: always()
+    
+    steps:
+      - name: Download security artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-report*"
+          merge-multiple: true
+
+      - name: Create security summary
+        run: |
+          echo "# Security Scan Summary" > security-summary.md
+          echo "" >> security-summary.md
+          echo "**Scan Date:** $(date)" >> security-summary.md
+          echo "**Commit:** ${{ github.sha }}" >> security-summary.md
+          echo "**Branch:** ${{ github.ref_name }}" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          echo "## Scan Results:" >> security-summary.md
+          echo "- **Dependency Scan:** ${{ needs.security-scan.result }}" >> security-summary.md
+          echo "- **CodeQL Analysis:** ${{ needs.codeql.result }}" >> security-summary.md
+          echo "- **Secret Scanning:** ${{ needs.secret-scan.result }}" >> security-summary.md
+          echo "- **License Check:** ${{ needs.license-check.result }}" >> security-summary.md
+          echo "- **OWASP Check:** ${{ needs.owasp-scan.result }}" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          if [ -f security-report.md ]; then
+            echo "## Vulnerability Details:" >> security-summary.md
+            cat security-report.md >> security-summary.md
+          fi
+          
+          if [ -f license-report.md ]; then
+            echo "" >> security-summary.md
+            cat license-report.md >> security-summary.md
+          fi
+
+      - name: Upload security summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-summary
+          path: security-summary.md
+          retention-days: 90
+
+      - name: Comment on PR with security results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            if (fs.existsSync('security-summary.md')) {
+              const summary = fs.readFileSync('security-summary.md', 'utf8');
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 🔒 Security Scan Results\n\n${summary}`
+              });
+            }
+
+      - name: Create security issue on failure
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Security Scan Failure - ${new Date().toISOString().split('T')[0]}`,
+              body: `# Security Scan Failure
+              
+              Weekly security scanning has detected issues that require attention.
+              
+              **Details:**
+              - Commit: ${{ github.sha }}
+              - Run: ${{ github.run_id }}
+              - Failed jobs: Check the workflow run for details
+              
+              Please review the security reports and address any findings.
+              
+              [View security scan results](../actions/runs/${{ github.run_id }})`,
+              labels: ['security', 'critical', 'automated']
+            });

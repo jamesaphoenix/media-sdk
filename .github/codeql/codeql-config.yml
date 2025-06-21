@@ -1,0 +1,49 @@
+# CodeQL Configuration for Media SDK Security Analysis
+
+name: "Media SDK CodeQL Config"
+
+# Include additional queries for enhanced security analysis
+queries:
+  - uses: security-and-quality
+  - uses: security-experimental
+
+# Configure path filters
+paths:
+  - "packages/media-sdk/src/**"
+  - "apps/bun-runtime/src/**"
+
+# Exclude certain paths from analysis
+paths-ignore:
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/*.d.ts"
+
+# Custom queries specific to media processing
+query-filters:
+  - exclude:
+      # Exclude certain false positives common in media processing
+      id: "js/useless-expression"
+      tags: ["external/cwe/cwe-489"]
+  - include:
+      # Include specific security patterns for FFmpeg integration
+      tags: ["security", "external/cwe/cwe-78", "external/cwe/cwe-79"]
+
+# Database settings
+database:
+  # Specify which languages to analyze
+  languages:
+    - typescript
+    - javascript
+  
+  # Optimize for our codebase structure
+  source-root: "."
+  
+  # Additional configuration for TypeScript
+  typescript:
+    # Include declaration files for better analysis
+    include-declaration-files: true
+    # Analyze test files for security issues
+    exclude-test-files: false

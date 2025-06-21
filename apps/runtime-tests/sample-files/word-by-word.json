@@ -1,0 +1,32 @@
+[
+  {
+    "word": "This",
+    "start": 0,
+    "end": 0.3
+  },
+  {
+    "word": "is",
+    "start": 0.3,
+    "end": 0.5
+  },
+  {
+    "word": "word",
+    "start": 0.5,
+    "end": 0.8
+  },
+  {
+    "word": "by",
+    "start": 0.8,
+    "end": 1
+  },
+  {
+    "word": "word",
+    "start": 1,
+    "end": 1.3
+  },
+  {
+    "word": "captions",
+    "start": 1.3,
+    "end": 1.8
+  }
+]

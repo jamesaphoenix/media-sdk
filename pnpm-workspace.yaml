@@ -1,0 +1,4 @@
+packages:
+  - packages/media-sdk
+  - apps/runtime-tests
+  - apps/docs

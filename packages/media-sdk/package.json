@@ -1,0 +1,70 @@
+{
+  "name": "@jamesaphoenix/media-sdk",
+  "version": "1.0.0",
+  "description": "Declarative, LLM-friendly API for video editing using FFmpeg",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./timeline": {
+      "import": "./dist/timeline/index.js",
+      "types": "./dist/timeline/index.d.ts"
+    },
+    "./video": {
+      "import": "./dist/video/index.js",
+      "types": "./dist/video/index.d.ts"
+    },
+    "./effects": {
+      "import": "./dist/effects/index.js",
+      "types": "./dist/effects/index.d.ts"
+    },
+    "./captions": {
+      "import": "./dist/captions/index.js",
+      "types": "./dist/captions/index.d.ts"
+    },
+    "./slideshow": {
+      "import": "./dist/slideshow/index.js",
+      "types": "./dist/slideshow/index.d.ts"
+    },
+    "./executor": {
+      "import": "./dist/executor/index.js",
+      "types": "./dist/executor/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "events": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "@vitest/coverage-v8": "^3.2.3",
+    "rimraf": "^5.0.9",
+    "typescript": "5.7.3",
+    "vitest": "^3.2.3"
+  },
+  "keywords": [
+    "video",
+    "editing",
+    "ffmpeg",
+    "media",
+    "ai",
+    "declarative",
+    "functional"
+  ],
+  "author": "James Phoenix",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jamesaphoenix/media-sdk"
+  }
+}

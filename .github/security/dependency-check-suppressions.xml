@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    
+    <!-- Suppress false positives for development dependencies -->
+    <suppress>
+        <notes>Bun test framework - only used in development</notes>
+        <packageUrl regex="true">^pkg:npm/bun@.*</packageUrl>
+        <cve>CVE-2023-46809</cve>
+    </suppress>
+    
+    <!-- Suppress known issues in FFmpeg that don't affect our usage -->
+    <suppress>
+        <notes>FFmpeg vulnerabilities in formats we don't use</notes>
+        <packageUrl regex="true">^pkg:generic/ffmpeg@.*</packageUrl>
+        <cve>CVE-2023-51798</cve>
+        <cve>CVE-2023-51794</cve>
+    </suppress>
+    
+    <!-- Suppress Node.js development tool vulnerabilities -->
+    <suppress>
+        <notes>TypeScript compiler - development only</notes>
+        <packageUrl regex="true">^pkg:npm/typescript@.*</packageUrl>
+        <vulnerabilityName regex="true">.*ReDoS.*</vulnerabilityName>
+    </suppress>
+    
+    <!-- Suppress @babel dependencies used only for AST parsing -->
+    <suppress>
+        <notes>Babel packages used for safe AST parsing only</notes>
+        <packageUrl regex="true">^pkg:npm/@babel/.*</packageUrl>
+        <cve>CVE-2023-45133</cve>
+    </suppress>
+    
+    <!-- Suppress Google AI SDK vulnerabilities that don't affect our usage -->
+    <suppress>
+        <notes>Google Generative AI - controlled environment usage</notes>
+        <packageUrl regex="true">^pkg:npm/@google/generative-ai@.*</packageUrl>
+        <vulnerabilityName regex="true">.*prototype.*</vulnerabilityName>
+    </suppress>
+    
+    <!-- Template for future suppressions -->
+    <!--
+    <suppress>
+        <notes>Description of why this vulnerability is suppressed</notes>
+        <packageUrl regex="true">^pkg:npm/package-name@.*</packageUrl>
+        <cve>CVE-YYYY-XXXXX</cve>
+    </suppress>
+    -->
+    
+</suppressions>

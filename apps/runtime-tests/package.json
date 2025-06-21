@@ -1,0 +1,24 @@
+{
+  "name": "media-sdk-runtime-tests",
+  "version": "1.0.0",
+  "description": "Runtime tests for Media SDK with cassette pattern",
+  "type": "module",
+  "scripts": {
+    "test": "node --loader ./loader.js src/index.js",
+    "test:record": "CASSETTE_MODE=record node --loader ./loader.js src/index.js",
+    "test:watch": "nodemon --exec 'node --loader ./loader.js src/index.js'",
+    "setup": "node src/setup-samples.js",
+    "clean": "rm -rf cassettes/* && rm -rf sample-files/*"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "tape": "^5.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

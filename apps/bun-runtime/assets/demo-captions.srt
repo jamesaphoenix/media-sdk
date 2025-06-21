@@ -1,0 +1,11 @@
+1
+00:00:00,000 --> 00:00:02,000
+Welcome to the Media SDK
+
+2
+00:00:02,500 --> 00:00:05,000
+Creating amazing videos with code
+
+3
+00:00:05,500 --> 00:00:08,000
+Powered by FFmpeg and Bun runtime

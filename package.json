@@ -1,0 +1,30 @@
+{
+  "name": "@jamesaphoenix/media-sdk-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI Media SDK - Declarative video editing with FFmpeg",
+  "scripts": {
+    "build": "cd packages/media-sdk && pnpm build",
+    "test": "cd packages/media-sdk && pnpm test",
+    "test:watch": "cd packages/media-sdk && pnpm test:watch",
+    "type-check": "cd packages/media-sdk && pnpm type-check",
+    "clean": "cd packages/media-sdk && pnpm clean",
+    "runtime:test": "cd apps/runtime-tests && pnpm test",
+    "runtime:test:record": "cd apps/runtime-tests && CASSETTE_MODE=record pnpm test",
+    "docs:dev": "cd apps/docs && pnpm dev",
+    "docs:build": "cd apps/docs && pnpm build",
+    "docs:start": "cd apps/docs && pnpm start"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "@vitest/coverage-v8": "^3.2.3",
+    "prettier": "^3.4.2",
+    "typescript": "5.7.3",
+    "vitest": "^3.2.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module",
+  "packageManager": "pnpm@10.10.0"
+}
