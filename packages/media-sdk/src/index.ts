@@ -64,7 +64,20 @@ export {
   audioFadeOut,
   socialMediaOptimized,
   dreamlike,
-  noir
+  noir,
+  // Pan and zoom effects
+  addPanZoom,
+  addKenBurns,
+  zoomIn,
+  zoomOut,
+  pan,
+  multiPanZoom,
+  suggestPanZoom,
+  panZoomEffect,
+  kenBurnsEffect,
+  zoomInEffect,
+  zoomOutEffect,
+  panEffect
 } from './effects/index.js';
 
 // Captions and subtitles
@@ -98,6 +111,38 @@ export type {
   ImageWithCaption,
   BatchImageResult
 } from './timeline/image-generator.js';
+
+// Enhanced image processing with download support
+export {
+  ImageProcessor,
+  ImageBatchProcessor,
+  ImageCollection,
+  createImageCollection,
+  processImageWithCaption,
+  processImageBatch
+} from './image/image-processor.js';
+
+export type {
+  ProcessedImage,
+  ImageProcessorOptions
+} from './image/image-processor.js';
+
+// Slideshow builder for content type integration
+export {
+  SlideshowBuilder,
+  createSlideshowBuilder,
+  slideshowToVideo,
+  slideshowToImages
+} from './slideshow/slideshow-builder.js';
+
+export type {
+  SlideshowCaption,
+  MediaRef,
+  SlideshowSlideData,
+  SlideshowContent,
+  ProcessedSlide,
+  SlideshowBuilderOptions
+} from './slideshow/slideshow-builder.js';
 
 // Slideshow functionality
 export {
@@ -139,6 +184,11 @@ export type {
   TimelineLayer,
   FFmpegCommand
 } from './types/index.js';
+
+export type {
+  PanZoomOptions,
+  KenBurnsEffectOptions
+} from './effects/index.js';
 
 export type {
   Word,

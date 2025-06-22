@@ -7,7 +7,10 @@ A declarative, LLM-friendly API for video editing using FFmpeg. Built with TypeS
 🎬 **Declarative Timeline API** - Build video compositions with method chaining  
 📱 **Platform Presets** - TikTok, YouTube, Instagram optimized formats  
 📝 **Advanced Captions** - Word-by-word highlighting for social media  
-🖼️ **Slideshow Generation** - Create presentations with precise positioning  
+🖼️ **Image Processing** - Download single images or arrays with rendered captions  
+📦 **Batch Processing** - Process multiple images efficiently with progress tracking  
+🔄 **Iterable Collections** - Work with image collections using familiar array methods  
+🎞️ **Slideshow Generation** - Create presentations with precise positioning  
 🎨 **Effects & Filters** - Functional composition of video effects  
 ⚡ **FFmpeg Executor** - Progress tracking and cancellation support  
 🤖 **LLM-Friendly** - Designed for easy AI agent integration  
@@ -45,7 +48,8 @@ await timeline.render('tiktok-ready.mp4');
 
 ## Documentation
 
-📚 **[Full Documentation](./apps/docs)** - Complete API reference and examples
+📚 **[Full Documentation](./apps/docs)** - Complete API reference and examples  
+🖼️ **[Image Processing Guide](./docs/image-processing.md)** - Download images with captions, batch processing, collections
 
 ## Project Structure
 
@@ -96,6 +100,29 @@ const vintageEffect = compose(
 );
 
 timeline.pipe(vintageEffect);
+```
+
+### Image Processing NEW!
+
+```typescript
+import { processImageWithCaption, ImageCollection } from '@jamesaphoenix/media-sdk';
+
+// Single image with caption download
+const result = await processImageWithCaption('photo.jpg', 'Summer 2024', {
+  style: { fontSize: 48, color: '#ffffff' }
+});
+const buffer = await result.download();
+
+// Batch process with collection
+const collection = new ImageCollection();
+collection
+  .addImage('img1.jpg', 'First Caption')
+  .addImage('img2.jpg', 'Second Caption');
+
+// Iterate and download
+for await (const img of collection) {
+  await img.save(`output/${img.id}.jpg`);
+}
 ```
 
 ### Advanced Captions

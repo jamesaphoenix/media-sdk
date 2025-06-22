@@ -522,16 +522,35 @@ export class Timeline {
     // Process video layers first
     const videoLayers = this.layers.filter(layer => layer.type === 'video');
     const imageLayers = this.layers.filter(layer => layer.type === 'image');
+    const filterLayers = this.layers.filter(layer => layer.type === 'filter');
+    
+    // Check if we have a zoompan filter that needs to be applied to an image
+    const hasZoompan = filterLayers.some(layer => layer.content === 'zoompan');
+    const needsImageAsBase = videoLayers.length === 0 && imageLayers.length > 0;
     
     // Determine initial stream - could be video or first image
     let currentVideoStream = '0:v'; // Remove brackets here, they'll be added when needed
     
-    // If no video layers but we have image layers, use first image as base
-    if (videoLayers.length === 0 && imageLayers.length > 0) {
+    // If no video layers but we have image layers, handle zoompan specially
+    if (needsImageAsBase) {
       const firstImage = imageLayers[0];
       const firstImageIndex = inputMap.get(firstImage.source!);
       if (firstImageIndex !== undefined) {
         currentVideoStream = `${firstImageIndex}:v`;
+        
+        // Apply zoompan filter first if it exists (for images)
+        if (hasZoompan) {
+          const zoompanLayer = filterLayers.find(layer => layer.content === 'zoompan');
+          if (zoompanLayer) {
+            const zoompanFilter = this.buildFilterString(zoompanLayer, `[${currentVideoStream}]`, 0);
+            if (zoompanFilter) {
+              filterChains.push(zoompanFilter);
+              currentVideoStream = 'filtered0';
+              // Remove this filter from the list to process later
+              filterLayers.splice(filterLayers.indexOf(zoompanLayer), 1);
+            }
+          }
+        }
       }
     }
 
@@ -613,13 +632,16 @@ export class Timeline {
       }
     });
 
-    // Apply filters
-    const filterLayers = this.layers.filter(layer => layer.type === 'filter');
-    filterLayers.forEach((layer, index) => {
-      const filterStr = this.buildFilterString(layer, `[${currentVideoStream}]`, index);
+    // Apply remaining filters (zoompan may have been handled earlier for images)
+    const remainingFilterLayers = needsImageAsBase && hasZoompan ? 
+      filterLayers : // Already modified array with zoompan removed
+      this.layers.filter(layer => layer.type === 'filter');
+      
+    remainingFilterLayers.forEach((layer, index) => {
+      const filterStr = this.buildFilterString(layer, `[${currentVideoStream}]`, index + (hasZoompan && needsImageAsBase ? 1 : 0));
       if (filterStr) {
         filterChains.push(filterStr);
-        currentVideoStream = `filtered${index}`;
+        currentVideoStream = `filtered${index + (hasZoompan && needsImageAsBase ? 1 : 0)}`;
       }
     });
 
@@ -966,6 +988,30 @@ export class Timeline {
         return `${inputStream}eq=contrast=${options.value || 1}[filtered${index}]`;
       case 'saturation':
         return `${inputStream}eq=saturation=${options.value || 1}[filtered${index}]`;
+      case 'zoompan':
+        // Handle zoompan filter specially
+        const zoomOpts = [];
+        if (options.z) zoomOpts.push(`z='${options.z}'`);
+        if (options.x) zoomOpts.push(`x='${options.x}'`);
+        if (options.y) zoomOpts.push(`y='${options.y}'`);
+        if (options.d) zoomOpts.push(`d=${options.d}`);
+        if (options.s) zoomOpts.push(`s=${options.s}`);
+        if (options.fps) zoomOpts.push(`fps=${options.fps}`);
+        if (options.raw) {
+          // If raw string provided, use it directly
+          return `${inputStream}zoompan=${options.raw}[filtered${index}]`;
+        }
+        return `${inputStream}zoompan=${zoomOpts.join(':')}[filtered${index}]`;
+      case 'colorchannelmixer':
+        const colorOpts = [];
+        if (options.rr) colorOpts.push(`rr=${options.rr}`);
+        if (options.gg) colorOpts.push(`gg=${options.gg}`);
+        if (options.bb) colorOpts.push(`bb=${options.bb}`);
+        return `${inputStream}colorchannelmixer=${colorOpts.join(':')}[filtered${index}]`;
+      case 'vignette':
+        const vignetteOpts = [];
+        if (options.angle) vignetteOpts.push(`angle=${options.angle}`);
+        return `${inputStream}vignette${vignetteOpts.length ? '=' + vignetteOpts.join(':') : ''}[filtered${index}]`;
       default:
         return `${inputStream}${content}[filtered${index}]`;
     }

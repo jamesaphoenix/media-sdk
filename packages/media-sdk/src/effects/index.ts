@@ -36,3 +36,23 @@ export {
   dreamlike,
   noir
 } from './effects.js';
+
+export {
+  addPanZoom,
+  addKenBurns,
+  zoomIn,
+  zoomOut,
+  pan,
+  multiPanZoom,
+  suggestPanZoom,
+  panZoomEffect,
+  kenBurnsEffect,
+  zoomInEffect,
+  zoomOutEffect,
+  panEffect
+} from './pan-zoom.js';
+
+export type {
+  PanZoomOptions,
+  KenBurnsEffectOptions
+} from './pan-zoom.js';
