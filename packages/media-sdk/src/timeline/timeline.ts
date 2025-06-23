@@ -72,7 +72,7 @@ import { CaptionDurationCalculator, imageCaptionPresets } from '../captions/imag
  */
 export class Timeline {
   /** @private Internal layer storage - use methods to modify */
-  private layers: TimelineLayer[] = [];
+  protected layers: TimelineLayer[] = [];
   
   /** @private Global timeline options like trim, scale, etc. */
   private globalOptions: Record<string, any> = {};

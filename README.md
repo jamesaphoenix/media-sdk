@@ -1061,6 +1061,397 @@ spanishSubs.forEach(sub => {
 const multiLangVideo = videoWithSubtitles.getCommand('lecture-multilang.mp4');
 ```
 
+### ✂️ Video Splicing & Trimming
+
+The Media SDK provides powerful video editing capabilities:
+
+```typescript
+import { VideoSplicer, Timeline } from '@jamesaphoenix/media-sdk';
+
+// Extract a segment
+const segment = VideoSplicer.extractSegment(timeline, 10, 20); // Extract 10-20 seconds
+
+// Remove unwanted parts
+const edited = VideoSplicer.removeSegments(timeline, [
+  { startTime: 5, endTime: 10 },   // Remove 5-10 seconds
+  { startTime: 20, endTime: 25 }   // Remove 20-25 seconds
+]);
+
+// Splice multiple clips together
+const montage = VideoSplicer.splice({
+  segments: [
+    { source: 'clip1.mp4', startTime: 0, endTime: 5 },
+    { source: 'clip2.mp4', startTime: 10, endTime: 15 },
+    { source: 'clip3.mp4', startTime: 20, endTime: 25 }
+  ],
+  defaultTransition: 'fade',
+  defaultTransitionDuration: 0.5
+});
+
+// Create highlight reel
+const highlights = VideoSplicer.createHighlightReel(timeline, [
+  { time: 30, duration: 5, priority: 'high' },
+  { time: 60, duration: 3, priority: 'medium' },
+  { time: 90, duration: 7, priority: 'high' }
+], {
+  maxDuration: 20,
+  sortByPriority: true
+});
+
+// Timeline methods
+const edited = timeline
+  .extractSegment(5, 15)      // Extract 10 seconds
+  .removeSegment(3, 5)        // Remove 2 seconds
+  .setStartTime(0);           // Reset to start at 0
+```
+
+### 🎥 Picture-in-Picture (PiP)
+
+Add overlay videos with various styles and animations:
+
+```typescript
+import { PictureInPicture } from '@jamesaphoenix/media-sdk';
+
+// Basic PiP
+const withPiP = timeline.addPictureInPicture('overlay.mp4', {
+  position: 'bottom-right',
+  scale: 0.25,
+  shadow: true,
+  borderRadius: 10
+});
+
+// Advanced PiP with animation
+const animated = PictureInPicture.add(timeline, 'webcam.mp4', {
+  position: 'bottom-left',
+  scale: 0.2,
+  animation: 'slide-in',
+  animationDuration: 0.5,
+  borderWidth: 3,
+  borderColor: '#00ff00',
+  opacity: 0.9
+});
+
+// Multiple PiP videos
+const multiPiP = PictureInPicture.addMultiple(timeline, {
+  videos: [
+    { source: 'cam1.mp4', options: { position: 'top-left' } },
+    { source: 'cam2.mp4', options: { position: 'top-right' } },
+    { source: 'cam3.mp4', options: { position: 'bottom-left' } }
+  ],
+  layout: 'grid'
+});
+
+// Reaction video layout
+const reaction = PictureInPicture.createReactionLayout(
+  'content.mp4',
+  'reaction.mp4',
+  {
+    reactionPosition: 'bottom-right',
+    reactionScale: 0.3,
+    reactionShape: 'circle'
+  }
+);
+
+// Gaming/tutorial webcam overlay
+const tutorial = PictureInPicture.createWebcamOverlay(timeline, 'webcam.mp4', {
+  shape: 'circle',
+  position: 'bottom-right',
+  scale: 0.2,
+  pulseEffect: true
+});
+```
+
+#### PiP Options:
+- **Positions**: `top-left`, `top-right`, `bottom-left`, `bottom-right`, `center`, or custom `{x, y}`
+- **Animations**: `none`, `slide-in`, `fade-in`, `bounce-in`, `zoom-in`
+- **Shapes**: Rectangle (default), circle (`borderRadius: 999`), rounded corners
+- **Effects**: Shadow, border, opacity, blur, rotation, flip
+- **Audio**: `mute`, `duck` (reduce volume), `full`, or custom volume (0-1)
+
+### 🎵 Audio Ducking
+
+Automatically reduce background music when voice/narration is present:
+
+```typescript
+import { AudioDucking } from '@jamesaphoenix/media-sdk';
+
+// Basic ducking
+const ducked = timeline.addAudioDucking({
+  duckingLevel: 0.3,         // Reduce to 30% volume
+  fadeInTime: 0.3,          // Fade down time
+  fadeOutTime: 0.5,         // Fade up time
+  voiceBoost: 1.2           // Boost voice to 120%
+});
+
+// Duck at specific regions
+const regionDucked = timeline.duckAudioAt([
+  { start: 5, end: 10 },
+  { start: 20, end: 30 },
+  { start: 45, end: 55 }
+], {
+  duckingLevel: 0.2
+});
+
+// Create dialogue mix
+const dialogue = AudioDucking.createDialogueMix(timeline, {
+  dialogueTrack: 'voice.mp3',
+  musicTrack: 'background.mp3',
+  ambienceTrack: 'nature.mp3',
+  dialogueBoost: 1.5,
+  musicDuckLevel: 0.2,
+  ambienceDuckLevel: 0.5
+});
+
+// Podcast/interview mix
+const podcast = AudioDucking.createPodcastMix(timeline, {
+  hosts: ['host1.mp3', 'host2.mp3'],
+  music: 'intro-music.mp3',
+  musicSegments: [
+    { start: 0, end: 10 },    // Intro
+    { start: 300, end: 310 }  // Outro
+  ],
+  normalDucking: 0.15
+});
+
+// Music bed with ducking points
+const musicBed = AudioDucking.createMusicBed(timeline, {
+  music: 'background-music.mp3',
+  duckingPoints: [
+    { time: 10, duration: 5, level: 0.2, reason: 'voiceover' },
+    { time: 30, duration: 3, level: 0.1, reason: 'announcement' }
+  ],
+  fadeIn: 2,
+  fadeOut: 3
+});
+```
+
+#### Ducking Features:
+- **Detection Modes**: `manual`, `automatic`, `sidechain`
+- **Frequency Ducking**: Duck only specific frequency ranges
+- **Multi-track Support**: Duck multiple tracks with different levels
+- **Smooth Transitions**: Configurable fade times and hold periods
+- **Professional Presets**: Dialogue, podcast, and music bed templates
+
+### 🎨 Advanced Image + Caption System
+
+Create stunning image compositions with professional captions, templates, and effects. Perfect for social media content, presentations, and marketing materials.
+
+```typescript
+import { ImageCaptionSystem } from '@jamesaphoenix/media-sdk';
+
+// Initialize the system
+const captionSystem = new ImageCaptionSystem();
+
+// Example 1: Instagram Post with Template
+const instagramPost = await captionSystem.createImageWithCaption({
+  image: 'vacation-photo.jpg',  // Local file or URL
+  caption: 'Living my best life! 🌴☀️ #VacationMode',
+  template: 'instagram-post'    // Pre-configured styling
+});
+
+// Example 2: TikTok Video with Viral Caption
+const tiktokVideo = await captionSystem.createImageWithCaption({
+  image: 'https://example.com/trending-image.jpg',
+  caption: 'Wait for it... 😱🔥',
+  template: 'tiktok-video',
+  duration: 10,
+  effects: {
+    kenBurns: {
+      startScale: 1.0,
+      endScale: 1.2,
+      startPosition: { x: 0.5, y: 0.5 },
+      endPosition: { x: 0.6, y: 0.4 }
+    }
+  }
+});
+
+// Example 3: Professional Slideshow with Ken Burns Effect
+const slideshow = await captionSystem.createKenBurnsSlideshow({
+  images: [
+    { 
+      image: 'slide1.jpg', 
+      caption: 'Welcome to Our Journey',
+      duration: 5,
+      effects: {
+        kenBurns: {
+          startScale: 1.0,
+          endScale: 1.1
+        }
+      }
+    },
+    { 
+      image: 'https://cdn.example.com/slide2.jpg', 
+      caption: 'Amazing Destinations',
+      duration: 5
+    },
+    { 
+      image: 'slide3.jpg', 
+      caption: 'Unforgettable Memories',
+      duration: 5
+    }
+  ],
+  transition: 'fade',
+  transitionDuration: 1,
+  music: {
+    file: 'background-music.mp3',
+    fadeIn: 2,
+    fadeOut: 2
+  }
+});
+
+// Example 4: Before/After Comparison
+const beforeAfter = await captionSystem.createBeforeAfter(
+  'before-renovation.jpg',
+  'after-renovation.jpg',
+  {
+    caption: {
+      before: 'BEFORE',
+      after: 'AFTER'
+    },
+    transition: 'wipe',
+    duration: 3
+  }
+);
+
+// Example 5: Photo Grid/Collage
+const photoGrid = await captionSystem.createPhotoGrid(
+  ['photo1.jpg', 'photo2.jpg', 'photo3.jpg', 'photo4.jpg'],
+  {
+    layout: '2x2',  // Also supports: '3x3', '2x3', '1x3'
+    captions: ['Summer', 'Autumn', 'Winter', 'Spring'],
+    spacing: 10,
+    duration: 10
+  }
+);
+
+// Example 6: Social Media Story (Multiple Pages)
+const story = await captionSystem.createStory([
+  {
+    image: 'story-page1.jpg',
+    caption: 'Swipe to see more →',
+    template: 'instagram-story'
+  },
+  {
+    image: 'story-page2.jpg',
+    caption: 'Amazing features inside!',
+    template: 'instagram-story'
+  },
+  {
+    image: 'story-page3.jpg',
+    caption: 'Link in bio! 🔗',
+    template: 'instagram-story'
+  }
+]);
+
+// Get FFmpeg command for any composition
+const command = slideshow.getCommand('vacation-slideshow.mp4');
+```
+
+#### Available Templates
+
+The system includes 12+ professional templates optimized for different platforms:
+
+- **`instagram-post`** - Square format with Instagram styling
+- **`instagram-story`** - 9:16 vertical with story-optimized text
+- **`tiktok-video`** - Viral-style captions with animations
+- **`youtube-thumbnail`** - Eye-catching thumbnail design
+- **`facebook-post`** - Facebook feed optimized
+- **`twitter-post`** - Twitter-friendly styling
+- **`news-lower-third`** - Professional news ticker style
+- **`documentary-subtitle`** - Cinematic subtitle styling
+- **`photo-gallery`** - Gallery-style captions
+- **`product-showcase`** - E-commerce optimized
+- **`quote-card`** - Beautiful quote presentations
+- **`before-after`** - Comparison layouts
+
+#### Custom Styling Options
+
+```typescript
+// Full control over caption appearance
+const customStyled = await captionSystem.createImageWithCaption({
+  image: 'background.jpg',
+  caption: 'Custom Styled Caption',
+  position: {
+    vertical: 'bottom',    // 'top', 'center', 'bottom'
+    horizontal: 'center',  // 'left', 'center', 'right'
+    offset: { x: 0, y: -50 }
+  },
+  style: {
+    fontSize: 48,
+    fontFamily: 'Arial, sans-serif',
+    color: '#FFFFFF',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    padding: '20px 40px',
+    borderRadius: '10px',
+    shadow: true,
+    animation: 'bounce',  // 'fade', 'slide', 'typewriter', 'bounce', 'glow'
+    animationDuration: 0.5
+  },
+  effects: {
+    filter: 'vintage',    // 'grayscale', 'sepia', 'vintage', 'blur', etc.
+    overlay: {
+      type: 'vignette',   // 'gradient', 'vignette', 'color'
+      opacity: 0.3
+    }
+  }
+});
+```
+
+#### Batch Processing
+
+```typescript
+// Process multiple images with consistent styling
+const images = ['img1.jpg', 'img2.jpg', 'img3.jpg'];
+const captions = ['First', 'Second', 'Third'];
+
+const results = await Promise.all(
+  images.map((img, i) => 
+    captionSystem.createImageWithCaption({
+      image: img,
+      caption: captions[i],
+      template: 'instagram-post'
+    })
+  )
+);
+
+// Combine into a single video
+let combined = new Timeline();
+results.forEach((timeline, i) => {
+  const command = timeline.getCommand(`temp-${i}.mp4`);
+  combined = combined.addVideo(`temp-${i}.mp4`, {
+    startTime: i * 5,
+    duration: 5
+  });
+});
+```
+
+#### Integration with Remote Images
+
+The Image Caption System seamlessly handles both local files and remote URLs:
+
+```typescript
+// Mix local and remote images
+const mixedSources = await captionSystem.createKenBurnsSlideshow({
+  images: [
+    { 
+      image: 'local-photo.jpg',
+      caption: 'Local file'
+    },
+    { 
+      image: 'https://cdn.example.com/remote-photo.jpg',
+      caption: 'Remote URL'
+    },
+    { 
+      image: 'https://api.example.com/image/123',
+      caption: 'API endpoint'
+    }
+  ],
+  transition: 'fade'
+});
+
+// The system automatically downloads and caches remote images
+```
+
 ## LLM Integration
 
 The SDK is designed to be easily understood and used by AI agents:

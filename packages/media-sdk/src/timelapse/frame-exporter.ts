@@ -342,6 +342,56 @@ export function exportTimelapseFrames(
 }
 
 /**
+ * Create a frame exporter instance
+ */
+export function createFrameExporter(options?: FrameExportOptions): FrameExporter {
+  return new FrameExporter(options);
+}
+
+/**
+ * Extract frames from a video timeline
+ */
+export function extractFrames(
+  timeline: Timeline,
+  options?: FrameExportOptions
+): FrameExporter {
+  // This would analyze the timeline and extract frames
+  // For now, return a new exporter
+  return new FrameExporter(options);
+}
+
+/**
+ * Options for key frame extraction
+ */
+export interface KeyFrameOptions {
+  interval?: number; // Extract every N seconds
+  sceneDetection?: boolean; // Extract on scene changes
+  maxFrames?: number; // Maximum number of frames to extract
+}
+
+/**
+ * Exported frame data
+ */
+export interface ExportedFrame {
+  path: string;
+  index: number;
+  timestamp: number;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Extract key frames from a video timeline
+ */
+export function extractKeyFrames(
+  timeline: Timeline,
+  options?: KeyFrameOptions
+): FrameExporter {
+  // This would analyze the timeline and extract key frames
+  // For now, return a new exporter
+  return new FrameExporter();
+}
+
+/**
  * Create social media ready frames
  */
 export function createSocialMediaFrames(

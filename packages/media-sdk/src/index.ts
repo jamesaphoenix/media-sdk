@@ -298,3 +298,75 @@ export type {
   RenderResult,
   RenderError
 } from './rendering/multi-resolution-renderer.js';
+
+// SRT subtitle support
+export {
+  SRTHandler,
+  createSRTHandler,
+  SRTWatcher
+} from './captions/srt-handler.js';
+
+export type {
+  SRTEntry,
+  SRTStyle,
+  SRTPosition,
+  SRTOptions,
+  SRTValidationResult,
+  SRTStats
+} from './captions/srt-handler.js';
+
+// Image source handling (remote URLs and local files)
+export {
+  ImageSourceHandler,
+  createTimelineWithRemoteSupport
+} from './utils/image-source-handler.js';
+
+export type {
+  ImageSourceOptions,
+  ProcessedImage as ProcessedImageSource
+} from './utils/image-source-handler.js';
+
+// Advanced Image + Caption System
+export {
+  ImageCaptionSystem
+} from './effects/image-caption-system.js';
+
+export type {
+  ImageCaptionOptions,
+  ImageCaptionTemplate,
+  CaptionPosition as ImageCaptionPosition,
+  CaptionStyle as ImageCaptionStyle,
+  ImageEffects,
+  SlideshowOptions as ImageSlideshowOptions
+} from './effects/image-caption-system.js';
+
+// Video Splicing & Trimming
+export {
+  VideoSplicer
+} from './timeline/video-splicer.js';
+
+export type {
+  TimeSegment,
+  SpliceOptions,
+  TrimOptions
+} from './timeline/video-splicer.js';
+
+// Picture-in-Picture
+export {
+  PictureInPicture
+} from './effects/picture-in-picture.js';
+
+export type {
+  PiPOptions,
+  MultiPiPOptions
+} from './effects/picture-in-picture.js';
+
+// Audio Ducking
+export {
+  AudioDucking
+} from './audio/audio-ducking.js';
+
+export type {
+  DuckingOptions,
+  AutoDuckingAnalysis
+} from './audio/audio-ducking.js';
