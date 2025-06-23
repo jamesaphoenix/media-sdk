@@ -5,6 +5,8 @@ description: Get started with Media SDK - the declarative, AI-friendly video pro
 
 import { Steps } from 'fumadocs-ui/components/steps';
 import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Package as PackageIcon, Code as CodeIcon, FileText as FileTextIcon, Settings as SettingsIcon, MousePointer as MousePointerIcon } from 'lucide-react';
 
 # Media SDK
 
@@ -103,10 +105,31 @@ const youtube = new Timeline()
   .setResolution(1920, 1080);
 ```
 
+## 📚 Documentation
+
+<Cards>
+  <Card title="Installation" href="/docs/installation" icon={<PackageIcon />}>
+    Get started with Media SDK in your project
+  </Card>
+  <Card title="Examples" href="/docs/examples" icon={<CodeIcon />}>
+    Real-world use cases and code samples
+  </Card>
+  <Card title="Interactive Demos" href="/docs/interactive" icon={<MousePointerIcon />}>
+    Try Media SDK features in your browser
+  </Card>
+  <Card title="API Reference" href="/docs/api" icon={<FileTextIcon />}>
+    Complete API documentation for all methods
+  </Card>
+  <Card title="Advanced Features" href="/docs/advanced" icon={<SettingsIcon />}>
+    Self-healing architecture and AI integration
+  </Card>
+</Cards>
+
 ## Next Steps
 
 - [📖 **API Reference**](/docs/api) - Complete API documentation
 - [🎬 **Examples**](/docs/examples) - Real-world usage examples
+- [🎨 **Interactive Demos**](/docs/interactive) - Try it in your browser
 - [🚀 **Advanced Features**](/docs/advanced) - Self-healing, vision integration
 - [🧪 **Testing**](/docs/testing) - Runtime validation and quality assurance
 

@@ -1,0 +1,135 @@
+name: Performance Benchmarks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    name: Run Performance Benchmarks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Run performance benchmarks
+        run: |
+          cd packages/media-sdk
+          pnpm test performance-benchmark.test.ts -- --reporter=verbose
+        env:
+          NODE_OPTIONS: --expose-gc
+          
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-report
+          path: packages/media-sdk/performance-report.md
+          retention-days: 30
+          
+      - name: Comment PR with results
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('packages/media-sdk/performance-report.md', 'utf8');
+            
+            const comment = `## 🚀 Performance Benchmark Results\n\n${report}\n\n<details>\n<summary>About these benchmarks</summary>\n\nThese benchmarks measure the performance of key Media SDK operations including timeline creation, command generation, and memory usage. They help ensure the SDK remains fast and efficient as new features are added.\n\n</details>`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+            
+      - name: Check performance thresholds
+        run: |
+          cd packages/media-sdk
+          pnpm test performance-benchmark.test.ts -- --reporter=silent || (echo "Performance regression detected!" && exit 1)
+        env:
+          NODE_OPTIONS: --expose-gc
+          
+  benchmark-comparison:
+    name: Compare with Base Branch
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Run benchmarks on PR branch
+        run: |
+          cd packages/media-sdk
+          pnpm test performance-benchmark.test.ts -- --reporter=json > pr-benchmarks.json
+        env:
+          NODE_OPTIONS: --expose-gc
+          
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          
+      - name: Install base dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Run benchmarks on base branch
+        run: |
+          cd packages/media-sdk
+          pnpm test performance-benchmark.test.ts -- --reporter=json > base-benchmarks.json
+        env:
+          NODE_OPTIONS: --expose-gc
+          
+      - name: Compare results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // This is a simplified comparison
+            // In a real implementation, you'd parse the JSON and create a detailed comparison
+            
+            const comment = `## 📊 Performance Comparison
+            
+            Benchmark comparison between base branch and PR will be available soon.
+            
+            _This is a placeholder for future implementation._`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

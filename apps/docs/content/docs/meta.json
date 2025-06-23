@@ -5,6 +5,7 @@
     "installation", 
     "api",
     "examples",
+    "interactive",
     "advanced",
     "testing",
     "migration"

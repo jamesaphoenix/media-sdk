@@ -1,0 +1,279 @@
+---
+title: Interactive Examples
+description: Try Media SDK features with interactive demos
+---
+
+import { TimelineBuilder } from '../../components/timeline-builder';
+import { FilterPlayground } from '../../components/filter-playground';
+import { CodeRunner } from '../../components/code-runner';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Interactive Examples
+
+Explore Media SDK features with these interactive demos. Build timelines, experiment with filters, and see the generated code in real-time.
+
+## Timeline Builder
+
+Build your video composition visually and see the generated SDK code.
+
+<TimelineBuilder />
+
+## Filter Playground
+
+Experiment with video filters and see how they affect your content.
+
+<FilterPlayground />
+
+## Live Code Examples
+
+Try these examples directly in your browser. Click "Run" to see the generated FFmpeg commands.
+
+<CodeRunner
+  title="Basic TikTok Video"
+  description="Create a simple TikTok-formatted video with text overlay"
+  code={`import { Timeline } from '@jamesaphoenix/media-sdk';
+
+const timeline = new Timeline()
+  .addVideo('input.mp4')
+  .setAspectRatio('9:16')
+  .setDuration(15)
+  .addText('Hello TikTok! 🔥', {
+    position: 'center',
+    style: {
+      fontSize: 48,
+      color: '#ffffff',
+      fontFamily: 'Arial Black',
+      strokeColor: '#000000',
+      strokeWidth: 3
+    }
+  });
+
+const command = timeline.getCommand('output.mp4');
+console.log(command);`}
+/>
+
+<CodeRunner
+  title="Picture-in-Picture"
+  description="Add a webcam overlay to your gameplay footage"
+  code={`import { Timeline, PictureInPicture } from '@jamesaphoenix/media-sdk';
+
+const timeline = new Timeline()
+  .addVideo('gameplay.mp4')
+  .setResolution(1920, 1080);
+
+const withWebcam = PictureInPicture.add(timeline, 'webcam.mp4', {
+  position: 'bottom-right',
+  scale: 0.25,
+  borderRadius: 999, // Circle
+  shadow: true
+});
+
+const command = withWebcam.getCommand('output.mp4');
+console.log(command);`}
+/>
+
+<CodeRunner
+  title="Word Highlighting Captions"
+  description="Create karaoke-style word highlighting effects"
+  code={`import { Timeline } from '@jamesaphoenix/media-sdk';
+
+const timeline = new Timeline()
+  .addVideo('background.mp4')
+  .addWordHighlighting({
+    text: 'Follow the bouncing words!',
+    words: [
+      { word: 'Follow', start: 0, end: 0.5 },
+      { word: 'the', start: 0.5, end: 0.8 },
+      { word: 'bouncing', start: 0.8, end: 1.5 },
+      { word: 'words!', start: 1.5, end: 2.0 }
+    ],
+    preset: 'karaoke',
+    baseStyle: {
+      fontSize: 48,
+      color: '#ffffff'
+    },
+    highlightStyle: {
+      color: '#ff0066',
+      scale: 1.2
+    }
+  });
+
+const command = timeline.getCommand('output.mp4');
+console.log(command);`}
+/>
+
+<CodeRunner
+  title="Green Screen Removal"
+  description="Remove green screen and composite videos"
+  code={`import { Timeline, PictureInPicture } from '@jamesaphoenix/media-sdk';
+
+const timeline = new Timeline()
+  .addVideo('background.mp4')
+  .setAspectRatio('16:9');
+
+const meme = PictureInPicture.addWithChromaKey(timeline, 'person-greenscreen.mp4', {
+  position: 'center',
+  scale: 0.6,
+  chromaKey: '#00FF00',
+  chromaSimilarity: 0.4,
+  chromaBlend: 0.1,
+  shadow: true
+});
+
+const withText = meme.addText('MIND = BLOWN 🤯', {
+  position: { x: 'center', y: '85%' },
+  style: {
+    fontSize: 64,
+    color: '#ff0000',
+    fontFamily: 'Impact',
+    strokeColor: '#ffffff',
+    strokeWidth: 4
+  }
+});
+
+const command = withText.getCommand('output.mp4');
+console.log(command);`}
+/>
+
+<CodeRunner
+  title="Pan & Zoom Effects"
+  description="Add cinematic movement to static images"
+  code={`import { Timeline, panZoomEffect, cinematicSequence } from '@jamesaphoenix/media-sdk';
+
+const timeline = new Timeline()
+  .addImage('landscape.jpg')
+  .setDuration(10);
+
+// Option 1: Simple zoom in
+const withZoom = timeline.pipe(
+  panZoomEffect({
+    startRect: { x: 0, y: 0, width: 1920, height: 1080 },
+    endRect: { x: 480, y: 270, width: 960, height: 540 },
+    duration: 10,
+    easing: 'ease-in-out'
+  })
+);
+
+// Option 2: Cinematic sequence
+const withCinematic = cinematicSequence(timeline, {
+  style: 'documentary',
+  duration: 10
+});
+
+const command = withCinematic.getCommand('output.mp4');
+console.log(command);`}
+/>
+
+## Platform-Specific Templates
+
+<CodeRunner
+  title="Instagram Story"
+  description="Create an Instagram Story with product showcase"
+  code={`import { Timeline } from '@jamesaphoenix/media-sdk';
+
+const story = new Timeline()
+  .setAspectRatio('9:16')
+  .setResolution(1080, 1920)
+  .setDuration(10)
+  .addVideo('gradient-background.mp4')
+  .addImage('product.jpg', {
+    position: { x: 'center', y: '40%' },
+    scale: 0.7,
+    animation: 'fade-in',
+    animationDuration: 1
+  })
+  .addText('NEW ARRIVAL', {
+    position: { x: 'center', y: '15%' },
+    style: {
+      fontSize: 36,
+      color: '#000000',
+      fontFamily: 'Arial Bold',
+      letterSpacing: 3
+    },
+    startTime: 1,
+    duration: 9
+  })
+  .addText('Shop Now →', {
+    position: { x: 'center', y: '80%' },
+    style: {
+      fontSize: 32,
+      color: '#ffffff',
+      backgroundColor: '#e4405f',
+      padding: 15,
+      borderRadius: 25
+    },
+    startTime: 3,
+    duration: 7
+  });
+
+const command = story.getCommand('instagram-story.mp4');
+console.log(command);`}
+/>
+
+<CodeRunner
+  title="YouTube Shorts"
+  description="Create engaging YouTube Shorts content"
+  code={`import { Timeline } from '@jamesaphoenix/media-sdk';
+
+const short = new Timeline()
+  .setAspectRatio('9:16')
+  .setResolution(1080, 1920)
+  .setDuration(30)
+  .addVideo('content.mp4')
+  .addAudio('upbeat-music.mp3', {
+    volume: 0.7,
+    fadeIn: 1,
+    fadeOut: 2
+  })
+  // Hook
+  .addText('You won\\'t believe this...', {
+    position: { x: 'center', y: '20%' },
+    style: {
+      fontSize: 44,
+      color: '#ffff00',
+      fontFamily: 'Arial Black',
+      strokeColor: '#000000',
+      strokeWidth: 3
+    },
+    startTime: 0,
+    duration: 3
+  })
+  // Main content text
+  .addText('The secret to viral videos:', {
+    position: { x: 'center', y: 'center' },
+    style: {
+      fontSize: 36,
+      color: '#ffffff',
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      padding: 20,
+      borderRadius: 15
+    },
+    startTime: 10,
+    duration: 5
+  })
+  // Call to action
+  .addText('SUBSCRIBE FOR MORE! 👇', {
+    position: { x: 'center', y: '85%' },
+    style: {
+      fontSize: 32,
+      color: '#ff0000',
+      fontFamily: 'Arial Bold',
+      animation: 'pulse'
+    },
+    startTime: 25,
+    duration: 5
+  });
+
+const command = short.getCommand('youtube-short.mp4');
+console.log(command);`}
+/>
+
+<Callout type="info">
+  **Note**: These are simulated examples that demonstrate the Media SDK API. In a real environment, you would need to have the actual media files and FFmpeg installed to execute the generated commands.
+</Callout>
+
+## Next Steps
+
+- [📖 API Reference](/docs/api) - Explore all available methods
+- [🎬 Real Examples](/docs/examples) - See production-ready code
+- [🧪 Testing Guide](/docs/testing) - Learn about quality assurance
