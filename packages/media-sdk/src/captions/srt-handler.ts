@@ -213,7 +213,7 @@ export class SRTHandler {
       const content = await fs.readFile(filepath, this.parseOptions.encoding);
       return this.parseSRT(content);
     } catch (error) {
-      throw new Error(`Failed to read SRT file: ${error.message}`);
+      throw new Error(`Failed to read SRT file: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -226,7 +226,7 @@ export class SRTHandler {
       const finalContent = this.generateOptions.addBOM ? '\ufeff' + content : content;
       await fs.writeFile(filepath, finalContent, 'utf-8');
     } catch (error) {
-      throw new Error(`Failed to write SRT file: ${error.message}`);
+      throw new Error(`Failed to write SRT file: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -565,9 +565,9 @@ export class SRTHandler {
     const timelineData = timeline.toJSON();
     
     // Extract text layers
-    const textLayers = timelineData.layers.filter(layer => layer.type === 'text');
+    const textLayers = (timelineData as any).layers?.filter((layer: any) => layer.type === 'text') || [];
     
-    textLayers.forEach((layer, index) => {
+    textLayers.forEach((layer: any, index: number) => {
       const startTime = layer.startTime || 0;
       const duration = layer.duration || 3;
       const endTime = startTime + duration;

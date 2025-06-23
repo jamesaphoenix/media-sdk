@@ -23,6 +23,9 @@ export interface VideoOptions {
   start?: number;
   duration?: number;
   position?: number;
+  startTime?: number;
+  trimStart?: number;
+  trimEnd?: number;
 }
 
 export interface TextStyle {
@@ -59,6 +62,38 @@ export interface TextOptions {
   startTime?: number;
 }
 
+export interface CaptionStyle {
+  fontFamily: string;
+  fontSize: number;
+  fontWeight?: number | 'bold' | 'normal' | 'lighter' | 'bolder';
+  fontStyle?: 'italic' | 'normal' | 'oblique';
+  color?: string;
+  backgroundColor?: string;
+  padding?: number;
+  borderRadius?: number;
+  textAlign?: 'left' | 'center' | 'right';
+  verticalAlign?: 'top' | 'middle' | 'bottom';
+  letterSpacing?: number;
+  lineHeight?: number;
+  strokeColor?: string;
+  strokeWidth?: number;
+  shadowColor?: string;
+  shadowBlur?: number;
+  shadowOffsetX?: number;
+  shadowOffsetY?: number;
+  background?: {
+    color?: string;
+    padding?: number;
+    borderRadius?: number;
+    opacity?: number;
+  };
+  border?: {
+    width: number;
+    style: 'solid' | 'dashed' | 'dotted';
+    color: string;
+  };
+}
+
 export interface ImageOptions {
   position?: Position | string;
   scale?: number;
@@ -83,6 +118,9 @@ export interface AudioOptions {
   highpass?: number;
   echo?: { delay: number; decay: number };
   reverb?: { room: number; damping: number };
+  pan?: number;
+  channels?: number;
+  sampleRate?: number;
 }
 
 export interface CropOptions {
@@ -131,6 +169,7 @@ export interface TimelineLayer {
   type: 'video' | 'audio' | 'text' | 'image' | 'filter';
   source?: string;
   content?: string;
+  text?: string;
   options: any;
   startTime: number;
   duration?: number;

@@ -144,7 +144,7 @@ export class Timeline {
       type: 'video',
       source: path,
       options,
-      startTime: options.position || 0,
+      startTime: options.startTime || options.position || 0,
       duration: options.duration
     };
 
@@ -413,9 +413,7 @@ export class Timeline {
     
     return new Timeline(
       [...this.layers, ...shiftedLayers],
-      this.globalOptions,
-      this.lastVideoStream,
-      this.lastAudioStream
+      this.globalOptions
     );
   }
 

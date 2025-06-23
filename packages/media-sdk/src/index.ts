@@ -200,7 +200,6 @@ export type {
 
 export type {
   Slide,
-  TransitionOptions,
   SlideshowOptions,
   TitleSlideOptions,
   BulletSlideOptions,
@@ -238,9 +237,7 @@ export {
 
 export type {
   TimelapseImage,
-  TimelapseOptions,
-  SpeedRamp,
-  TimelapseEffect
+  TimelapseOptions
 } from './timelapse/timelapse-builder.js';
 
 // Frame exporter
@@ -266,7 +263,6 @@ export type {
   TransitionType,
   EasingFunction,
   TransitionDirection,
-  TransitionOptions,
   TransitionPoint
 } from './transitions/transition-engine.js';
 
@@ -310,9 +306,7 @@ export type {
   SRTEntry,
   SRTStyle,
   SRTPosition,
-  SRTOptions,
-  SRTValidationResult,
-  SRTStats
+  SRTValidationResult
 } from './captions/srt-handler.js';
 
 // Image source handling (remote URLs and local files)

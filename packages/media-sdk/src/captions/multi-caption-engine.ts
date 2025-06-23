@@ -233,10 +233,11 @@ export interface CaptionFormat {
  */
 export class MultiCaptionEngine {
   private tracks: Map<string, CaptionTrack> = new Map();
-  private globalDefaults: Partial<CaptionStyle> = {
+  private globalDefaults: CaptionStyle = {
     fontFamily: 'Arial',
     fontSize: 32,
     fontWeight: 'bold',
+    fontStyle: 'normal',
     color: '#ffffff',
     strokeColor: '#000000',
     strokeWidth: 2,
@@ -288,7 +289,10 @@ export class MultiCaptionEngine {
       language,
       languageName,
       captions: [],
-      defaultStyle: { ...this.globalDefaults, ...options?.defaultStyle },
+      defaultStyle: { 
+        ...this.globalDefaults, 
+        ...options?.defaultStyle
+      },
       position: options?.position,
       enabled: true,
       priority: options?.priority || 1

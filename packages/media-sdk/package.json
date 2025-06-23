@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "Declarative, AI-friendly API for video manipulation using FFmpeg. Features functional composition, real-world video rendering, and comprehensive runtime testing.",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/index-simple.js",
+  "types": "dist/index-simple.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index-simple.js",
+      "types": "./dist/index-simple.d.ts"
     },
     "./effect": {
       "import": "./dist/index-effect.js",

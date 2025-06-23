@@ -59,11 +59,62 @@ export { Timeline as TimelineOriginal } from './timeline/timeline.js'
 // Re-export all other SDK functionality
 // ============================================================================
 
-// Types
-export * from './types/index.js'
+// Types (avoiding conflicts)
+export type { 
+  VideoOptions, 
+  TextOptions, 
+  ImageOptions, 
+  AudioOptions, 
+  CropOptions, 
+  FilterOptions, 
+  RenderOptions,
+  Dimensions,
+  TimeRange,
+  TextStyle,
+  CaptionStyle,
+  ExecutionResult,
+  TimelineLayer,
+  FFmpegCommand,
+  ProgressInfo
+} from './types/index.js'
 
-// Effects and transformations
-export * from './effects/index.js'
+// Effects and transformations (avoiding conflicts)
+export {
+  fadeIn,
+  fadeOut,
+  crossfade,
+  brightness,
+  contrast,
+  saturation,
+  hue,
+  gamma,
+  blur,
+  gaussianBlur,
+  motionBlur,
+  grayscale,
+  sepia,
+  invert,
+  vignette,
+  filmGrain,
+  vintage,
+  cinematic,
+  scale,
+  crop,
+  rotate,
+  flip,
+  speed,
+  reverse,
+  chromakey,
+  stabilize,
+  denoise,
+  wipe,
+  volumeAdjust,
+  audioFadeIn,
+  audioFadeOut,
+  socialMediaOptimized,
+  dreamlike,
+  noir
+} from './effects/index.js'
 
 // Caption systems
 export * from './captions/captions.js'
@@ -78,8 +129,8 @@ export * from './query/index.js'
 // Image processing
 export * from './image/index.js'
 
-// Slideshow builder
-export * from './slideshow/index.js'
+// Slideshow builder (avoiding slide conflict)
+export { slideshow } from './slideshow/index.js'
 
 // Executor
 export * from './executor/index.js'
@@ -108,8 +159,8 @@ export const quickTikTok = async (
   
   let video = await timeline
     .addVideo(videoPath)
-    .then(t => t.setAspectRatio('9:16'))
-    .then(t => t.addText(caption, { 
+    .then((t: Timeline) => t.setAspectRatio('9:16'))
+    .then((t: Timeline) => t.addText(caption, { 
       position: 'bottom',
       style: { fontSize: 48, color: '#ffffff', strokeWidth: 3 }
     }))
@@ -138,8 +189,8 @@ export const quickYouTube = async (
   
   let video = await timeline
     .addVideo(videoPath)
-    .then(t => t.setAspectRatio('16:9'))
-    .then(t => t.addText(title, {
+    .then((t: Timeline) => t.setAspectRatio('16:9'))
+    .then((t: Timeline) => t.addText(title, {
       position: 'top',
       startTime: 0,
       duration: 5,
@@ -170,8 +221,8 @@ export const quickInstagram = async (
   
   let video = await timeline
     .addVideo(videoPath)
-    .then(t => t.setAspectRatio('1:1'))
-    .then(t => t.addText(caption, {
+    .then((t: Timeline) => t.setAspectRatio('1:1'))
+    .then((t: Timeline) => t.addText(caption, {
       position: 'center',
       style: { 
         fontSize: 36, 
@@ -223,7 +274,7 @@ export const batchProcessVideos = (
  */
 export const createOptimizedVideo = (
   videoPath: string,
-  platform: Platform
+  platform: 'tiktok' | 'youtube' | 'instagram' | 'twitter'
 ) => Effect.gen(function* () {
   const timeline = yield* Timeline.empty()
   const withVideo = yield* timeline.addVideo(videoPath)

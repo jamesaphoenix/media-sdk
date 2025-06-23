@@ -64,8 +64,8 @@ export interface CaptionStyle {
   fontFamily?: string;
   color?: string;
   backgroundColor?: string;
-  padding?: string;
-  borderRadius?: string;
+  padding?: number;
+  borderRadius?: number;
   shadow?: boolean;
   animation?: 'fade' | 'slide' | 'typewriter' | 'bounce' | 'glow';
   animationDuration?: number;
@@ -132,8 +132,8 @@ export class ImageCaptionSystem {
         fontFamily: 'Arial, sans-serif',
         color: '#262626',
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        padding: '12px 16px',
-        borderRadius: '8px',
+        padding: 12,
+        borderRadius: 8,
         shadow: true,
         animation: 'fade',
         animationDuration: 0.5
@@ -148,8 +148,8 @@ export class ImageCaptionSystem {
         fontFamily: 'Arial, sans-serif',
         color: '#FFFFFF',
         backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        padding: '20px 30px',
-        borderRadius: '12px',
+        padding: 20,
+        borderRadius: 12,
         shadow: true,
         animation: 'bounce',
         animationDuration: 0.3
@@ -167,8 +167,8 @@ export class ImageCaptionSystem {
         fontFamily: 'Arial, sans-serif',
         color: '#1c1e21',
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        padding: '12px 20px',
-        borderRadius: '8px',
+        padding: 12,
+        borderRadius: 8,
         shadow: true,
         animation: 'fade',
         animationDuration: 0.5
@@ -183,8 +183,8 @@ export class ImageCaptionSystem {
         fontFamily: 'Arial, sans-serif',
         color: '#14171a',
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        padding: '10px 15px',
-        borderRadius: '16px',
+        padding: 10,
+        borderRadius: 16,
         shadow: true,
         animation: 'slide',
         animationDuration: 0.3
@@ -199,8 +199,8 @@ export class ImageCaptionSystem {
         fontFamily: 'Arial Black, sans-serif',
         color: '#FFFFFF',
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        padding: '10px 20px',
-        borderRadius: '5px',
+        padding: 10,
+        borderRadius: 5,
         shadow: true,
         animation: 'fade',
         animationDuration: 0.5
@@ -232,8 +232,8 @@ export class ImageCaptionSystem {
         fontFamily: 'Arial Black, sans-serif',
         color: '#FFFFFF',
         backgroundColor: 'rgba(255, 0, 0, 0.9)',
-        padding: '20px 40px',
-        borderRadius: '10px',
+        padding: 20,
+        borderRadius: 10,
         shadow: true,
         animation: 'fade',
         animationDuration: 0.5
@@ -248,8 +248,8 @@ export class ImageCaptionSystem {
         fontFamily: 'Arial, sans-serif',
         color: '#FFFFFF',
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        padding: '15px 30px',
-        borderRadius: '0',
+        padding: 15,
+        borderRadius: 0,
         shadow: false,
         animation: 'slide',
         animationDuration: 0.5
@@ -264,8 +264,8 @@ export class ImageCaptionSystem {
         fontFamily: 'Georgia, serif',
         color: '#FFFFFF',
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        padding: '10px 20px',
-        borderRadius: '4px',
+        padding: 10,
+        borderRadius: 4,
         shadow: true,
         animation: 'fade',
         animationDuration: 1
@@ -280,8 +280,8 @@ export class ImageCaptionSystem {
         fontFamily: 'Arial, sans-serif',
         color: '#FFFFFF',
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        padding: '8px 16px',
-        borderRadius: '4px',
+        padding: 8,
+        borderRadius: 4,
         shadow: false,
         animation: 'fade',
         animationDuration: 0.3
@@ -300,8 +300,8 @@ export class ImageCaptionSystem {
         fontFamily: 'Arial, sans-serif',
         color: '#FFFFFF',
         backgroundColor: 'rgba(230, 126, 34, 0.9)',
-        padding: '15px 30px',
-        borderRadius: '30px',
+        padding: 15,
+        borderRadius: 30,
         shadow: true,
         animation: 'bounce',
         animationDuration: 0.5
@@ -319,8 +319,8 @@ export class ImageCaptionSystem {
         fontFamily: 'Georgia, serif',
         color: '#FFFFFF',
         backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        padding: '40px 60px',
-        borderRadius: '10px',
+        padding: 40,
+        borderRadius: 10,
         shadow: true,
         animation: 'fade',
         animationDuration: 2
@@ -351,9 +351,9 @@ export class ImageCaptionSystem {
     const finalOptions = {
       ...templateOptions,
       ...options,
-      position: { ...templateOptions.position, ...options.position },
-      style: { ...templateOptions.style, ...options.style },
-      effects: { ...templateOptions.effects, ...options.effects }
+      position: { ...templateOptions?.position, ...options.position },
+      style: { ...templateOptions?.style, ...options.style },
+      effects: { ...templateOptions?.effects, ...options.effects }
     } as ImageCaptionOptions;
 
     // Create timeline
@@ -419,15 +419,15 @@ export class ImageCaptionSystem {
           position: {
             x: '50%',
             y: '85%',
-            ...templateOptions.position
+            ...templateOptions?.position
           },
           style: {
             fontSize: 32,
             color: '#FFFFFF',
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            padding: '10px 20px',
-            borderRadius: '5px',
-            ...templateOptions.style
+            padding: 10,
+            borderRadius: 5,
+            ...templateOptions?.style
           }
         });
       }
@@ -485,8 +485,8 @@ export class ImageCaptionSystem {
           fontSize: 24,
           color: '#FFFFFF',
           backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          padding: '5px 10px',
-          borderRadius: '5px'
+          padding: 5,
+          borderRadius: 5
         }
       });
     }
@@ -508,8 +508,8 @@ export class ImageCaptionSystem {
           fontSize: 24,
           color: '#FFFFFF',
           backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          padding: '5px 10px',
-          borderRadius: '5px'
+          padding: 5,
+          borderRadius: 5
         }
       });
     }
@@ -569,8 +569,8 @@ export class ImageCaptionSystem {
               fontSize: 14,
               color: '#FFFFFF',
               backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              padding: '2px 5px',
-              borderRadius: '3px'
+              padding: 2,
+              borderRadius: 3
             }
           });
         }

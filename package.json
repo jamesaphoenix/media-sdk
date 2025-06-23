@@ -24,7 +24,13 @@
     "release": "pnpm build && pnpm test && pnpm runtime:test:core-primitives",
     "docs:dev": "cd apps/docs && pnpm dev",
     "docs:build": "cd apps/docs && pnpm build",
-    "docs:start": "cd apps/docs && pnpm start"
+    "docs:start": "cd apps/docs && pnpm start",
+    "examples:basic": "cd examples && node basic-timeline.js",
+    "examples:tiktok": "cd examples && node tiktok-video.js",
+    "examples:youtube": "cd examples && node youtube-highlights.js",
+    "examples:podcast": "cd examples && node podcast-clip.js",
+    "examples:captions": "cd examples && node advanced-captions.js",
+    "examples:all": "pnpm examples:basic && pnpm examples:tiktok && pnpm examples:youtube"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
