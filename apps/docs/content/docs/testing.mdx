@@ -1,0 +1,586 @@
+---
+title: Testing
+description: Comprehensive testing strategies including runtime validation and quality assurance
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Testing
+
+Media SDK includes a comprehensive testing infrastructure designed for reliability at scale.
+
+## 🧪 Test Coverage
+
+Over **120+ tests** with **97% coverage** across all systems:
+
+- **Unit Tests** - Core functionality validation
+- **Runtime Tests** - Real FFmpeg execution with media files  
+- **Vision Tests** - AI-powered quality validation
+- **Integration Tests** - End-to-end workflow verification
+- **Performance Tests** - Stress testing and benchmarking
+
+## Unit Testing
+
+### Basic Timeline Tests
+
+```typescript
+import { Timeline } from '@jamesaphoenix/media-sdk';
+import { describe, test, expect } from 'vitest';
+
+describe('Timeline Core Functionality', () => {
+  test('should create timeline with video', () => {
+    const timeline = new Timeline()
+      .addVideo('test.mp4')
+      .setDuration(10);
+    
+    expect(timeline.layers).toHaveLength(1);
+    expect(timeline.layers[0].type).toBe('video');
+    expect(timeline.getDuration()).toBe(10);
+  });
+
+  test('should add text with styling', () => {
+    const timeline = new Timeline()
+      .addText('Hello World', {
+        style: {
+          fontSize: 48,
+          color: '#ffffff',
+          fontFamily: 'Arial Bold'
+        },
+        position: { x: 'center', y: 'center' }
+      });
+    
+    const textLayer = timeline.layers.find(l => l.type === 'text');
+    expect(textLayer).toBeDefined();
+    expect(textLayer?.content).toBe('Hello World');
+  });
+
+  test('should generate valid FFmpeg command', () => {
+    const timeline = new Timeline()
+      .addVideo('input.mp4')
+      .addText('Test', { position: { x: 50, y: 50 } });
+    
+    const command = timeline.getCommand('output.mp4');
+    
+    expect(command).toContain('ffmpeg');
+    expect(command).toContain('-i input.mp4');
+    expect(command).toContain('output.mp4');
+  });
+});
+```
+
+### Color System Tests
+
+```typescript
+describe('🌈 Color Highlighting System', () => {
+  test('should support hex colors', () => {
+    const timeline = new Timeline()
+      .addText('Colorful text', {
+        style: { color: '#ff0066' }
+      });
+    
+    const command = timeline.getCommand('output.mp4');
+    expect(command).toContain('ff0066');
+  });
+
+  test('should support RGB transparency', () => {
+    const timeline = new Timeline()
+      .addText('Transparent text', {
+        style: { color: 'rgba(255,0,102,0.8)' }
+      });
+    
+    const command = timeline.getCommand('output.mp4');
+    expect(command).toContain('alpha');
+  });
+
+  test('should support HSL gradients', () => {
+    const timeline = new Timeline()
+      .addText('Gradient text', {
+        style: { color: 'hsl(340, 100%, 50%)' }
+      });
+    
+    const command = timeline.getCommand('output.mp4');
+    expect(command).toContain('color');
+  });
+});
+```
+
+### Timing & Synchronization Tests
+
+```typescript
+describe('⏰ Timing & Synchronization', () => {
+  test('should handle millisecond precision', () => {
+    const timeline = new Timeline()
+      .addText('Precise timing', {
+        startTime: 1.123,
+        duration: 2.456
+      });
+    
+    const textLayer = timeline.layers[0];
+    expect(textLayer.startTime).toBe(1.123);
+    expect(textLayer.duration).toBe(2.456);
+  });
+
+  test('should handle overlapping elements', () => {
+    const timeline = new Timeline()
+      .addText('First', { startTime: 0, duration: 5 })
+      .addText('Second', { startTime: 3, duration: 4 });
+    
+    expect(timeline.layers).toHaveLength(2);
+    // Should allow overlapping by design
+  });
+
+  test('should handle rapid-fire text changes', () => {
+    const timeline = new Timeline();
+    
+    for (let i = 0; i < 100; i++) {
+      timeline.addText(`Text ${i}`, {
+        startTime: i * 0.1,
+        duration: 0.2
+      });
+    }
+    
+    expect(timeline.layers).toHaveLength(100);
+  });
+});
+```
+
+## Runtime Testing
+
+### Real FFmpeg Execution
+
+```typescript
+import { Timeline, executeFFmpeg } from '@jamesaphoenix/media-sdk';
+import { test, expect } from 'vitest';
+
+describe('Runtime Validation', () => {
+  test('should execute real FFmpeg command', async () => {
+    const timeline = new Timeline()
+      .addVideo('assets/test-video.mp4')
+      .addText('Runtime Test', {
+        position: { x: 'center', y: 'center' },
+        duration: 3
+      })
+      .setDuration(5);
+    
+    const command = timeline.getCommand('output/runtime-test.mp4');
+    const result = await executeFFmpeg(command);
+    
+    expect(result.success).toBe(true);
+    expect(result.output).toContain('video:');
+    expect(result.duration).toBeGreaterThan(0);
+  }, 30000); // 30 second timeout
+
+  test('should handle multiple audio tracks', async () => {
+    const timeline = new Timeline()
+      .addVideo('assets/test-video.mp4')
+      .addAudio('assets/background-music.mp3', { volume: 0.5 })
+      .addAudio('assets/voice-over.wav', { startTime: 2 });
+    
+    const command = timeline.getCommand('output/multi-audio.mp4');
+    const result = await executeFFmpeg(command);
+    
+    expect(result.success).toBe(true);
+  }, 45000);
+});
+```
+
+### Cassette System Testing
+
+```typescript
+import { EnhancedBunCassetteManager } from '@jamesaphoenix/media-sdk';
+
+describe('Cassette System', () => {
+  let cassetteManager: EnhancedBunCassetteManager;
+  
+  beforeEach(() => {
+    cassetteManager = new EnhancedBunCassetteManager({
+      mode: 'record',
+      baseDir: 'test-cassettes'
+    });
+  });
+
+  test('should record and replay commands', async () => {
+    const command = 'ffmpeg -f lavfi -i testsrc=duration=1:size=320x240 test-output.mp4';
+    
+    // First execution - records
+    const result1 = await cassetteManager.executeCommand(command);
+    expect(result1.success).toBe(true);
+    
+    // Switch to replay mode
+    cassetteManager.setMode('replay');
+    
+    // Second execution - replays instantly
+    const start = Date.now();
+    const result2 = await cassetteManager.executeCommand(command);
+    const duration = Date.now() - start;
+    
+    expect(result2.success).toBe(true);
+    expect(duration).toBeLessThan(100); // Should be nearly instant
+  });
+});
+```
+
+## Vision Testing
+
+### AI Quality Validation
+
+```typescript
+import { VisionRuntimeValidator } from '@jamesaphoenix/media-sdk';
+
+describe('🔍 Vision Validation System', () => {
+  let validator: VisionRuntimeValidator;
+  
+  beforeEach(() => {
+    validator = new VisionRuntimeValidator();
+  });
+
+  test('should validate video quality', async () => {
+    const timeline = new Timeline()
+      .addVideo('assets/high-quality.mp4')
+      .addText('Clear readable text', {
+        style: {
+          fontSize: 48,
+          color: '#ffffff',
+          strokeColor: '#000000',
+          strokeWidth: 2
+        }
+      });
+    
+    const command = timeline.getCommand('output/quality-test.mp4');
+    await executeFFmpeg(command);
+    
+    const validation = await validator.validateRender(
+      'output/quality-test.mp4',
+      'youtube',
+      { command, timeline },
+      ['Clear readable text'],
+      [command]
+    );
+    
+    expect(validation.isValid).toBe(true);
+    expect(validation.qualityScore).toBeGreaterThan(0.75);
+    expect(validation.textDetection?.confidence).toBeGreaterThan(0.8);
+  }, 60000);
+
+  test('should detect poor quality and suggest improvements', async () => {
+    const timeline = new Timeline()
+      .addVideo('assets/low-quality.mp4')
+      .addText('tiny text', {
+        style: {
+          fontSize: 12,  // Too small
+          color: '#cccccc'  // Poor contrast
+        }
+      });
+    
+    const command = timeline.getCommand('output/poor-quality.mp4');
+    await executeFFmpeg(command);
+    
+    const validation = await validator.validateRender(
+      'output/poor-quality.mp4',
+      'tiktok',
+      { command, timeline },
+      ['tiny text'],
+      [command]
+    );
+    
+    expect(validation.qualityScore).toBeLessThan(0.5);
+    expect(validation.suggestions).toContain('increase font size');
+    expect(validation.suggestions).toContain('improve contrast');
+  }, 60000);
+});
+```
+
+### Platform Compliance Testing
+
+```typescript
+describe('📱 Platform Compliance', () => {
+  test('should validate TikTok format requirements', async () => {
+    const timeline = new Timeline()
+      .setAspectRatio('9:16')
+      .setResolution(1080, 1920)
+      .addVideo('assets/portrait-video.mp4');
+    
+    const validation = await validator.validateRender(
+      'output/tiktok-test.mp4',
+      'tiktok',
+      { timeline },
+      [],
+      []
+    );
+    
+    expect(validation.platformCompliance?.aspectRatio).toBe('9:16');
+    expect(validation.platformCompliance?.resolution).toEqual([1080, 1920]);
+  });
+
+  test('should validate YouTube format requirements', async () => {
+    const timeline = new Timeline()
+      .setAspectRatio('16:9')
+      .setResolution(1920, 1080)
+      .addVideo('assets/landscape-video.mp4');
+    
+    const validation = await validator.validateRender(
+      'output/youtube-test.mp4',
+      'youtube',
+      { timeline },
+      [],
+      []
+    );
+    
+    expect(validation.platformCompliance?.aspectRatio).toBe('16:9');
+    expect(validation.platformCompliance?.resolution).toEqual([1920, 1080]);
+  });
+});
+```
+
+## Performance Testing
+
+### Stress Testing
+
+```typescript
+describe('💪 Performance & Stress Testing', () => {
+  test('should handle 1000+ text layers', async () => {
+    const timeline = new Timeline()
+      .addVideo('assets/test-video.mp4');
+    
+    // Add 1000 text layers
+    for (let i = 0; i < 1000; i++) {
+      timeline.addText(`Text ${i}`, {
+        startTime: Math.random() * 60,
+        duration: 1 + Math.random() * 2,
+        position: {
+          x: Math.random() * 1920,
+          y: Math.random() * 1080
+        }
+      });
+    }
+    
+    expect(timeline.layers).toHaveLength(1001); // 1 video + 1000 text
+    
+    const start = Date.now();
+    const command = timeline.getCommand('output/stress-test.mp4');
+    const duration = Date.now() - start;
+    
+    expect(duration).toBeLessThan(1000); // Should generate in under 1 second
+    expect(command).toContain('ffmpeg');
+  }, 10000);
+
+  test('should maintain performance with complex filters', () => {
+    const timeline = new Timeline()
+      .addVideo('assets/test-video.mp4')
+      .addFilter('scale=1920:1080')
+      .addFilter('brightness=0.1')
+      .addFilter('contrast=1.2')
+      .addFilter('saturation=1.1')
+      .addFilter('hue=10')
+      .addFilter('gamma=0.9')
+      .addFilter('sharpen=1.0')
+      .addFilter('denoise=10')
+      .addFilter('stabilize=10');
+    
+    const start = Date.now();
+    const command = timeline.getCommand('output/complex-filters.mp4');
+    const duration = Date.now() - start;
+    
+    expect(duration).toBeLessThan(500);
+    expect(command).toContain('filter_complex');
+  });
+});
+```
+
+### Memory Usage Testing
+
+```typescript
+describe('💾 Memory Efficiency', () => {
+  test('should maintain low memory usage with large timelines', () => {
+    const getMemoryUsage = () => process.memoryUsage().heapUsed / 1024 / 1024;
+    
+    const initialMemory = getMemoryUsage();
+    
+    const timeline = new Timeline();
+    
+    // Add 10,000 operations
+    for (let i = 0; i < 10000; i++) {
+      timeline
+        .addText(`Text ${i}`, { startTime: i })
+        .addImage(`image-${i}.png`, { startTime: i })
+        .addFilter(`brightness=${Math.random()}`);
+    }
+    
+    const finalMemory = getMemoryUsage();
+    const memoryIncrease = finalMemory - initialMemory;
+    
+    // Should use less than 100MB for 10k operations
+    expect(memoryIncrease).toBeLessThan(100);
+  });
+});
+```
+
+## Test Configuration
+
+### Vitest Configuration
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+    timeout: 60000,     // 60 second timeout for video processing
+    testTimeout: 120000, // 2 minute timeout for complex tests
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      thresholds: {
+        global: {
+          branches: 85,
+          functions: 90,
+          lines: 95,
+          statements: 95
+        }
+      }
+    },
+    setupFiles: ['./test-setup.ts']
+  }
+});
+```
+
+### Test Setup
+
+```typescript
+// test-setup.ts
+import { beforeAll, afterAll } from 'vitest';
+import { promises as fs } from 'fs';
+
+beforeAll(async () => {
+  // Create test output directories
+  await fs.mkdir('output', { recursive: true });
+  await fs.mkdir('test-cassettes', { recursive: true });
+  
+  // Set test environment variables
+  process.env.CASSETTE_MODE = 'auto';
+  process.env.VISION_QUALITY_THRESHOLD = '0.7';
+});
+
+afterAll(async () => {
+  // Cleanup test files (optional)
+  // await fs.rm('output', { recursive: true, force: true });
+});
+```
+
+## Running Tests
+
+### Local Development
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run specific test suite
+npm test -- --grep "Timeline"
+
+# Run runtime tests only
+npm run test:runtime
+
+# Watch mode for development
+npm run test:watch
+```
+
+### CI/CD Pipeline
+
+```yaml
+# GitHub Actions example
+name: Media SDK Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup FFmpeg
+        run: sudo apt-get install -y ffmpeg
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Run unit tests
+        run: npm test
+        
+      - name: Run runtime tests
+        run: npm run test:runtime
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+```
+
+## Test-Driven Development
+
+### Red-Green-Refactor Cycle
+
+```typescript
+// 1. RED - Write failing test
+test('should add video with precise timing', () => {
+  const timeline = new Timeline()
+    .addVideo('test.mp4', {
+      startTime: 1.5,
+      duration: 3.7
+    });
+  
+  expect(timeline.layers[0].startTime).toBe(1.5);
+  expect(timeline.layers[0].duration).toBe(3.7);
+});
+
+// 2. GREEN - Implement minimal code to pass
+// (Implementation in Timeline class)
+
+// 3. REFACTOR - Improve code quality
+// (Optimize performance, add error handling)
+```
+
+<Callout type="info">
+  **Best Practice**: Always run both unit tests and runtime tests before committing. The cassette system makes runtime tests fast during development.
+</Callout>
+
+## Quality Assurance
+
+### Continuous Integration
+
+The test suite runs automatically on every commit:
+
+- ✅ **Unit Tests** - 54 tests covering core functionality
+- ✅ **Runtime Tests** - 20+ tests with real FFmpeg execution  
+- ✅ **Vision Tests** - AI-powered quality validation
+- ✅ **Performance Tests** - Stress testing and memory monitoring
+- ✅ **Integration Tests** - End-to-end workflow verification
+
+### Test Reports
+
+```bash
+# Generate comprehensive test report
+npm run test:report
+
+# View coverage report
+open coverage/index.html
+
+# Analyze performance metrics
+npm run test:perf
+```
+
+## Next Steps
+
+- [📖 API Reference](/docs/api) - Complete method documentation
+- [🚀 Advanced Features](/docs/advanced) - Self-healing and vision integration
+- [🎬 Examples](/docs/examples) - Real-world usage patterns

@@ -1,0 +1,412 @@
+---
+title: Advanced Features
+description: Self-healing architecture, vision integration, and performance optimization
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Advanced Features
+
+Media SDK includes cutting-edge features that set it apart from traditional video processing libraries.
+
+## 🧬 Self-Healing Architecture
+
+The revolutionary self-healing system automatically detects and fixes quality issues using AI vision analysis.
+
+### How It Works
+
+```typescript
+import { Timeline, VisionValidator } from '@jamesaphoenix/media-sdk';
+
+const timeline = new Timeline()
+  .addVideo('input.mp4')
+  .addText('Hello World!', {
+    position: { x: 'center', y: 'center' },
+    style: { fontSize: 32, color: '#ffffff' }
+  });
+
+// Generate and validate
+const command = timeline.getCommand('output.mp4');
+const validator = new VisionValidator();
+
+// Execute with validation
+const result = await executeWithValidation(command, validator);
+
+if (result.qualityScore < 0.7) {
+  // Automatic optimization suggestions
+  console.log('Suggestions:', result.suggestions);
+  
+  // Apply automatic fixes
+  const optimizedTimeline = timeline.pipe(
+    applyOptimizations(result.suggestions)
+  );
+}
+```
+
+### Quality Metrics
+
+The vision system analyzes multiple quality dimensions:
+
+- **Text Readability** - Font size, contrast, positioning
+- **Platform Compliance** - Aspect ratio, resolution, format
+- **Visual Quality** - Clarity, composition, color balance
+- **Content Appropriateness** - Safe for platform guidelines
+
+### Automatic Optimizations
+
+```typescript
+// Font size optimization
+if (analysis.textDetection?.confidence < 0.8) {
+  suggestions.push({
+    type: 'increase-font-size',
+    currentSize: 32,
+    recommendedSize: 48,
+    reason: 'Improve mobile readability'
+  });
+}
+
+// Contrast improvement
+if (analysis.contrastRatio < 4.5) {
+  suggestions.push({
+    type: 'improve-contrast',
+    currentRatio: 3.2,
+    recommendedColors: ['#ffffff', '#000000'],
+    reason: 'Meet WCAG accessibility standards'
+  });
+}
+
+// Platform optimization
+if (analysis.aspectRatio !== targetPlatform.ratio) {
+  suggestions.push({
+    type: 'adjust-aspect-ratio',
+    current: '16:9',
+    recommended: '9:16',
+    reason: 'Optimize for TikTok/Stories format'
+  });
+}
+```
+
+## 👁️ Vision Integration
+
+Integrate Google's Gemini Vision API for intelligent quality analysis.
+
+### Setup
+
+```bash
+# Set your Gemini API key
+export GEMINI_API_KEY=your_api_key_here
+```
+
+### Vision Validation
+
+```typescript
+import { VisionRuntimeValidator } from '@jamesaphoenix/media-sdk';
+
+const validator = new VisionRuntimeValidator();
+
+const validation = await validator.validateRender(
+  'output.mp4',           // Video file to analyze
+  'tiktok',              // Target platform
+  { command, timeline }, // Context information
+  ['Expected', 'Text'],  // Expected text content
+  [command]              // FFmpeg commands used
+);
+
+console.log('Quality Score:', validation.qualityScore);
+console.log('Is Valid:', validation.isValid);
+console.log('Suggestions:', validation.suggestions);
+```
+
+### Platform-Specific Analysis
+
+```typescript
+// TikTok optimization
+const tiktokAnalysis = await validator.validateRender(video, 'tiktok');
+// Checks: 9:16 ratio, mobile readability, engagement factors
+
+// YouTube optimization  
+const youtubeAnalysis = await validator.validateRender(video, 'youtube');
+// Checks: 16:9 ratio, thumbnail quality, title placement
+
+// Instagram optimization
+const instagramAnalysis = await validator.validateRender(video, 'instagram');
+// Checks: Multiple ratios, story compliance, brand guidelines
+```
+
+### Custom Vision Models
+
+```typescript
+class CustomVisionAnalyzer {
+  async analyzeBrand(videoPath: string, brandGuidelines: BrandGuide) {
+    // Custom brand compliance checking
+    const frames = await this.extractFrames(videoPath);
+    
+    return {
+      brandCompliance: this.checkBrandColors(frames, brandGuidelines),
+      logoPlacement: this.verifyLogoPosition(frames),
+      fontUsage: this.validateFonts(frames, brandGuidelines.fonts)
+    };
+  }
+}
+```
+
+## ⚡ Performance Optimization
+
+### Cassette System
+
+Intelligent caching system that records and replays FFmpeg commands for lightning-fast development.
+
+```typescript
+import { EnhancedBunCassetteManager } from '@jamesaphoenix/media-sdk';
+
+const cassetteManager = new EnhancedBunCassetteManager({
+  mode: 'auto',  // 'record', 'replay', or 'auto'
+  baseDir: './cassettes'
+});
+
+// First run: records actual FFmpeg execution
+const result1 = await cassetteManager.executeCommand(command);
+
+// Subsequent runs: instant replay from cassette
+const result2 = await cassetteManager.executeCommand(command); // ⚡ Instant!
+```
+
+### AST-Based Dependency Tracking
+
+Automatically invalidates cassettes when source code changes.
+
+```typescript
+import { CassetteDependencyTracker } from '@jamesaphoenix/media-sdk';
+
+const tracker = new CassetteDependencyTracker();
+
+// Register cassette with dependencies
+tracker.registerCassette('video-render', [
+  'src/timeline.ts',
+  'src/effects.ts',
+  'assets/video.mp4'
+]);
+
+// Smart invalidation - only when dependencies actually change
+const shouldInvalidate = tracker.shouldInvalidateCassette('video-render');
+if (shouldInvalidate) {
+  // Re-record cassette with new dependencies
+  await cassetteManager.recordCassette('video-render', command);
+}
+```
+
+### Parallel Processing
+
+```typescript
+import { BatchExecutor } from '@jamesaphoenix/media-sdk';
+
+const batchExecutor = new BatchExecutor({
+  maxConcurrency: 4,     // Process 4 videos simultaneously
+  timeout: 300000,       // 5 minute timeout per video
+  retries: 3             // Retry failed jobs
+});
+
+const commands = [
+  timeline1.getCommand('output1.mp4'),
+  timeline2.getCommand('output2.mp4'),
+  timeline3.getCommand('output3.mp4'),
+];
+
+const results = await batchExecutor.executeAll(commands);
+results.forEach((result, index) => {
+  if (result.success) {
+    console.log(`Video ${index + 1}: ✅ Success`);
+  } else {
+    console.log(`Video ${index + 1}: ❌ Failed - ${result.error}`);
+  }
+});
+```
+
+## 🎯 Platform Optimization
+
+### Intelligent Presets
+
+```typescript
+// Automatic platform optimization
+const optimizeForTikTok = (timeline: Timeline) => 
+  timeline
+    .setAspectRatio('9:16')
+    .setResolution(1080, 1920)
+    .pipe(t => enhanceForMobile(t))
+    .pipe(t => addViralElements(t));
+
+const optimizeForYouTube = (timeline: Timeline) =>
+  timeline
+    .setAspectRatio('16:9')
+    .setResolution(1920, 1080)
+    .pipe(t => enhanceForDesktop(t))
+    .pipe(t => addThumbnailOptimization(t));
+
+// Usage
+const tiktokVideo = baseTimeline.pipe(optimizeForTikTok);
+const youtubeVideo = baseTimeline.pipe(optimizeForYouTube);
+```
+
+### Multi-Platform Generation
+
+```typescript
+function generateForAllPlatforms(baseTimeline: Timeline, outputName: string) {
+  const platforms = [
+    { name: 'tiktok', optimizer: optimizeForTikTok },
+    { name: 'youtube', optimizer: optimizeForYouTube },
+    { name: 'instagram', optimizer: optimizeForInstagram },
+    { name: 'twitter', optimizer: optimizeForTwitter }
+  ];
+
+  return platforms.map(platform => {
+    const optimized = baseTimeline.pipe(platform.optimizer);
+    const command = optimized.getCommand(`${outputName}-${platform.name}.mp4`);
+    
+    return {
+      platform: platform.name,
+      command,
+      timeline: optimized
+    };
+  });
+}
+
+// Generate videos for all platforms simultaneously
+const allPlatforms = generateForAllPlatforms(timeline, 'my-content');
+```
+
+## 🔧 Custom Extensions
+
+### Plugin System
+
+```typescript
+interface TimelinePlugin {
+  name: string;
+  apply(timeline: Timeline): Timeline;
+}
+
+class BrandingPlugin implements TimelinePlugin {
+  name = 'branding';
+  
+  constructor(private brandConfig: BrandConfig) {}
+  
+  apply(timeline: Timeline): Timeline {
+    return timeline
+      .addImage(this.brandConfig.logo, {
+        position: this.brandConfig.logoPosition,
+        scale: this.brandConfig.logoScale,
+        duration: 'full'
+      })
+      .pipe(t => this.applyBrandColors(t));
+  }
+  
+  private applyBrandColors(timeline: Timeline): Timeline {
+    // Apply brand color palette to text elements
+    return timeline; // Implementation details...
+  }
+}
+
+// Usage
+const brandPlugin = new BrandingPlugin({
+  logo: 'brand-logo.png',
+  logoPosition: { x: '85%', y: '15%' },
+  logoScale: 0.2,
+  primaryColor: '#ff0066',
+  secondaryColor: '#ffffff'
+});
+
+const brandedVideo = timeline.pipe(t => brandPlugin.apply(t));
+```
+
+### Custom Filters
+
+```typescript
+class CustomEffects {
+  static vintageFilm(timeline: Timeline): Timeline {
+    return timeline.addFilter([
+      'curves=vintage',
+      'noise=alls=20:allf=t',
+      'vignette=angle=PI/4'
+    ].join(','));
+  }
+  
+  static modernGlow(timeline: Timeline): Timeline {
+    return timeline.addFilter([
+      'gblur=sigma=2',
+      'overlay=lighten',
+      'vibrance=intensity=0.3'
+    ].join(','));
+  }
+  
+  static cinematic(timeline: Timeline): Timeline {
+    return timeline
+      .addFilter('crop=in_w:in_h*0.75') // Letterbox
+      .addFilter('colorchannelmixer=.3:.4:.3:0:.3:.4:.3:0:.3:.4:.3') // Teal/Orange
+      .addFilter('curves=increase_contrast');
+  }
+}
+
+// Apply custom effects
+const styledVideo = timeline
+  .pipe(CustomEffects.vintageFilm)
+  .pipe(CustomEffects.cinematic);
+```
+
+## 📊 Analytics Integration
+
+### Performance Monitoring
+
+```typescript
+import { PerformanceMonitor } from '@jamesaphoenix/media-sdk';
+
+const monitor = new PerformanceMonitor();
+
+monitor.on('render-start', (data) => {
+  console.log(`Starting render: ${data.outputFile}`);
+  console.log(`Complexity score: ${data.complexityScore}`);
+});
+
+monitor.on('render-progress', (data) => {
+  console.log(`Progress: ${data.percent}% (${data.fps} fps)`);
+});
+
+monitor.on('render-complete', (data) => {
+  console.log(`Completed in ${data.duration}ms`);
+  console.log(`Output size: ${data.fileSize} bytes`);
+  console.log(`Quality score: ${data.qualityScore}`);
+  
+  // Send to analytics
+  analytics.track('video_render_complete', {
+    duration: data.duration,
+    quality: data.qualityScore,
+    platform: data.targetPlatform
+  });
+});
+```
+
+### Quality Metrics
+
+```typescript
+interface QualityMetrics {
+  visualQuality: number;      // 0-1 scale
+  audioQuality: number;       // 0-1 scale  
+  platformCompliance: number; // 0-1 scale
+  accessibility: number;      // 0-1 scale
+  engagement: number;         // Predicted engagement score
+  brandCompliance: number;    // Brand guideline adherence
+}
+
+const metrics = await analyzer.getQualityMetrics('output.mp4');
+console.log('Overall Quality Score:', metrics.visualQuality * 0.4 + 
+                                      metrics.audioQuality * 0.2 + 
+                                      metrics.platformCompliance * 0.4);
+```
+
+<Callout type="tip">
+  **Pro Tip**: Combine multiple advanced features for maximum impact. Use vision validation with the cassette system for rapid iteration with quality assurance.
+</Callout>
+
+## Next Steps
+
+- [🧪 Testing](/docs/testing) - Learn about comprehensive testing
+- [📖 API Reference](/docs/api) - Detailed method documentation
+- [🎬 Examples](/docs/examples) - More practical usage examples

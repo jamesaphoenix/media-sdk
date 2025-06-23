@@ -1,0 +1,485 @@
+---
+title: Examples
+description: Real-world examples and use cases for Media SDK
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Examples
+
+Practical examples showing how to use Media SDK for real-world video creation scenarios.
+
+## TikTok Videos
+
+Create viral TikTok-style content with mobile-optimized formatting.
+
+```typescript
+import { Timeline } from '@jamesaphoenix/media-sdk';
+
+const tiktokVideo = new Timeline()
+  // Mobile-first 9:16 aspect ratio
+  .setAspectRatio('9:16')
+  .setResolution(1080, 1920)
+  .setDuration(15)
+  
+  // Main content video
+  .addVideo('content.mp4')
+  
+  // Background music
+  .addAudio('viral-beat.mp3', { 
+    volume: 0.6,
+    loop: true 
+  })
+  
+  // Hook text at the beginning
+  .addText('Wait for it... 👀', {
+    position: { x: 'center', y: '15%' },
+    style: {
+      fontSize: 48,
+      color: '#ffffff',
+      fontFamily: 'Arial Black',
+      strokeColor: '#000000',
+      strokeWidth: 3
+    },
+    startTime: 0,
+    duration: 3
+  })
+  
+  // Payoff text
+  .addText('OMG!! 😱🔥', {
+    position: { x: 'center', y: '15%' },
+    style: {
+      fontSize: 64,
+      color: '#ff0066',
+      fontFamily: 'Arial Black',
+      strokeColor: '#ffffff',
+      strokeWidth: 2
+    },
+    startTime: 8,
+    duration: 2
+  })
+  
+  // Call to action
+  .addText('Follow for more! ✨', {
+    position: { x: 'center', y: '85%' },
+    style: {
+      fontSize: 32,
+      color: '#ffffff',
+      fontFamily: 'Arial Bold'
+    },
+    startTime: 12,
+    duration: 3
+  });
+
+const command = tiktokVideo.getCommand('tiktok-viral.mp4');
+```
+
+<Callout type="info">
+  **TikTok Tips**: Use high-contrast colors, keep text large for mobile viewing, and structure content as Hook → Payoff → Call-to-Action.
+</Callout>
+
+## YouTube Gaming Highlights
+
+Create epic gaming highlight reels optimized for YouTube.
+
+```typescript
+const gamingHighlights = new Timeline()
+  // Desktop 16:9 format
+  .setAspectRatio('16:9')
+  .setResolution(1920, 1080)
+  .setDuration(60)
+  
+  // Main gameplay footage
+  .addVideo('gameplay-main.mp4')
+  
+  // Epic background music
+  .addAudio('epic-gaming-music.mp3', { 
+    volume: 0.7,
+    fadeIn: 2,
+    fadeOut: 3
+  })
+  
+  // Webcam overlay (picture-in-picture)
+  .addVideo('webcam-reaction.mp4', {
+    position: { x: '75%', y: '75%' },
+    scale: 0.25,
+    startTime: 5,
+    duration: 15
+  })
+  
+  // Title card
+  .addText('INSANE CLUTCH! 🔥', {
+    position: { x: 'center', y: '20%' },
+    style: {
+      fontSize: 72,
+      color: '#ff6600',
+      fontFamily: 'Impact',
+      strokeColor: '#000000',
+      strokeWidth: 4
+    },
+    startTime: 0,
+    duration: 4
+  })
+  
+  // Subscribe reminder
+  .addText('SMASH THAT SUBSCRIBE! 👆', {
+    position: { x: 'center', y: '90%' },
+    style: {
+      fontSize: 32,
+      color: '#ff0000',
+      fontFamily: 'Arial Bold'
+    },
+    startTime: 50,
+    duration: 10
+  });
+```
+
+## Podcast Clips
+
+Transform long-form podcast content into shareable social media clips.
+
+```typescript
+const podcastClip = new Timeline()
+  // Square format for social media
+  .setResolution(1080, 1080)
+  .setDuration(45)
+  
+  // Background video/image
+  .addVideo('podcast-background.mp4')
+  
+  // Main audio content
+  .addAudio('podcast-segment.mp3', {
+    volume: 1.0
+  })
+  
+  // Podcast branding
+  .addImage('podcast-logo.png', {
+    position: { x: 'center', y: '15%' },
+    scale: 0.3,
+    duration: 45
+  })
+  
+  // Quote text overlay
+  .addText('"The future of AI is\\nnot replacing humans,\\nbut empowering them."', {
+    position: { x: 'center', y: 'center' },
+    style: {
+      fontSize: 36,
+      color: '#ffffff',
+      fontFamily: 'Georgia',
+      textAlign: 'center',
+      lineHeight: 1.4,
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      padding: 20,
+      borderRadius: 15
+    },
+    startTime: 5,
+    duration: 30
+  })
+  
+  // Speaker attribution
+  .addText('Dr. Sarah Chen\\nAI Research Director', {
+    position: { x: 'center', y: '75%' },
+    style: {
+      fontSize: 24,
+      color: '#cccccc',
+      fontFamily: 'Arial',
+      textAlign: 'center'
+    },
+    startTime: 10,
+    duration: 25
+  });
+```
+
+## Instagram Stories
+
+Create engaging Instagram Stories with automated formatting.
+
+```typescript
+const instagramStory = new Timeline()
+  .setAspectRatio('9:16')
+  .setResolution(1080, 1920)
+  .setDuration(10)
+  
+  // Background gradient or video
+  .addVideo('story-background.mp4')
+  
+  // Main image or video content
+  .addImage('product-photo.jpg', {
+    position: { x: 'center', y: 'center' },
+    scale: 0.8
+  })
+  
+  // Brand logo
+  .addImage('brand-logo.png', {
+    position: { x: '85%', y: '15%' },
+    scale: 0.15,
+    duration: 10
+  })
+  
+  // Story text
+  .addText('New Product\\nLaunching Soon! 🚀', {
+    position: { x: 'center', y: '80%' },
+    style: {
+      fontSize: 40,
+      color: '#ffffff',
+      fontFamily: 'Arial Bold',
+      textAlign: 'center',
+      strokeColor: '#000000',
+      strokeWidth: 2
+    },
+    startTime: 2,
+    duration: 8
+  });
+```
+
+## Multi-Language Captions
+
+Create videos with multiple language tracks.
+
+```typescript
+import { Timeline, MultiCaptionEngine } from '@jamesaphoenix/media-sdk';
+
+// Create caption engine
+const captionEngine = new MultiCaptionEngine();
+
+// Set global styling
+captionEngine.setGlobalDefaults({
+  fontFamily: 'Arial Bold',
+  fontSize: 36,
+  color: '#ffffff',
+  strokeColor: '#000000',
+  strokeWidth: 2
+});
+
+// Create language tracks
+const englishTrack = captionEngine.createTrack('en', 'English');
+const spanishTrack = captionEngine.createTrack('es', 'Español');
+
+// Add English captions
+captionEngine.addCaption(englishTrack.id, {
+  text: 'Welcome to our product demo!',
+  startTime: 0,
+  endTime: 3
+});
+
+captionEngine.addCaption(englishTrack.id, {
+  text: 'This revolutionary feature will change everything.',
+  startTime: 3,
+  endTime: 7
+});
+
+// Add Spanish captions
+captionEngine.addCaption(spanishTrack.id, {
+  text: '¡Bienvenido a nuestra demo del producto!',
+  startTime: 0,
+  endTime: 3
+});
+
+captionEngine.addCaption(spanishTrack.id, {
+  text: 'Esta característica revolucionaria lo cambiará todo.',
+  startTime: 3,
+  endTime: 7
+});
+
+// Create timeline with captions
+const timeline = new Timeline()
+  .addVideo('product-demo.mp4')
+  .setDuration(10);
+
+// In a full implementation, you would integrate the caption engine
+// with the timeline to generate appropriate subtitle filters
+```
+
+## Automated Marketing Videos
+
+Create template-based marketing videos with dynamic content.
+
+```typescript
+function createMarketingVideo(productName: string, price: string, imageUrl: string) {
+  return new Timeline()
+    .setAspectRatio('1:1')
+    .setResolution(1080, 1080)
+    .setDuration(8)
+    
+    // Background
+    .addVideo('marketing-template.mp4')
+    
+    // Product image
+    .addImage(imageUrl, {
+      position: { x: 'center', y: '40%' },
+      scale: 0.6,
+      startTime: 1,
+      duration: 6
+    })
+    
+    // Product name
+    .addText(productName, {
+      position: { x: 'center', y: '70%' },
+      style: {
+        fontSize: 48,
+        color: '#333333',
+        fontFamily: 'Arial Bold',
+        textAlign: 'center'
+      },
+      startTime: 2,
+      duration: 5
+    })
+    
+    // Price
+    .addText(`Only ${price}!`, {
+      position: { x: 'center', y: '80%' },
+      style: {
+        fontSize: 36,
+        color: '#ff0066',
+        fontFamily: 'Arial Bold',
+        textAlign: 'center'
+      },
+      startTime: 4,
+      duration: 4
+    })
+    
+    // Call to action
+    .addText('Shop Now! 🛒', {
+      position: { x: 'center', y: '90%' },
+      style: {
+        fontSize: 32,
+        color: '#ffffff',
+        fontFamily: 'Arial Bold',
+        backgroundColor: '#ff0066',
+        padding: 10,
+        borderRadius: 20
+      },
+      startTime: 6,
+      duration: 2
+    });
+}
+
+// Generate multiple product videos
+const products = [
+  { name: 'Wireless Headphones', price: '$99', image: 'headphones.jpg' },
+  { name: 'Smart Watch', price: '$199', image: 'watch.jpg' },
+  { name: 'Phone Case', price: '$29', image: 'case.jpg' }
+];
+
+products.forEach(product => {
+  const timeline = createMarketingVideo(product.name, product.price, product.image);
+  const command = timeline.getCommand(`${product.name.toLowerCase().replace(' ', '-')}.mp4`);
+  console.log(command);
+});
+```
+
+## Live Streaming Overlays
+
+Create dynamic overlays for live streaming.
+
+```typescript
+const streamOverlay = new Timeline()
+  .setResolution(1920, 1080)
+  .setDuration(60)
+  
+  // Transparent background for overlay
+  .addVideo('transparent-background.mov')
+  
+  // Stream title
+  .addText('LIVE: Building the Future', {
+    position: { x: 'center', y: '10%' },
+    style: {
+      fontSize: 36,
+      color: '#ffffff',
+      fontFamily: 'Arial Bold',
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      padding: 15,
+      borderRadius: 10
+    },
+    duration: 60
+  })
+  
+  // Social media handles
+  .addText('@username', {
+    position: { x: '90%', y: '90%' },
+    style: {
+      fontSize: 24,
+      color: '#ffffff',
+      fontFamily: 'Arial'
+    },
+    duration: 60
+  })
+  
+  // Live indicator
+  .addText('🔴 LIVE', {
+    position: { x: '10%', y: '10%' },
+    style: {
+      fontSize: 28,
+      color: '#ff0000',
+      fontFamily: 'Arial Bold'
+    },
+    duration: 60
+  });
+```
+
+## Batch Processing
+
+Process multiple videos with the same template.
+
+```typescript
+import { promises as fs } from 'fs';
+
+async function batchProcessVideos(inputDir: string, outputDir: string) {
+  const files = await fs.readdir(inputDir);
+  const videoFiles = files.filter(file => file.endsWith('.mp4'));
+  
+  for (const file of videoFiles) {
+    const inputPath = `${inputDir}/${file}`;
+    const outputPath = `${outputDir}/processed-${file}`;
+    
+    const timeline = new Timeline()
+      .addVideo(inputPath)
+      
+      // Add consistent branding
+      .addImage('brand-logo.png', {
+        position: { x: '85%', y: '15%' },
+        scale: 0.2,
+        duration: 'full'
+      })
+      
+      // Add intro text
+      .addText('Branded Content', {
+        position: { x: 'center', y: '90%' },
+        style: {
+          fontSize: 32,
+          color: '#ffffff',
+          fontFamily: 'Arial Bold',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          padding: 10
+        },
+        startTime: 0,
+        duration: 3
+      });
+    
+    const command = timeline.getCommand(outputPath, {
+      quality: 'high',
+      codec: 'h264'
+    });
+    
+    console.log(`Processing: ${file}`);
+    console.log(`Command: ${command}`);
+    
+    // Execute command using your preferred method
+    // await executeFFmpeg(command);
+  }
+}
+
+// Usage
+// await batchProcessVideos('./input-videos', './output-videos');
+```
+
+<Callout type="tip">
+  **Performance Tip**: For batch processing, consider using the `FFmpegExecutor` with parallel processing limits to avoid overwhelming your system.
+</Callout>
+
+## Next Steps
+
+- [🚀 Advanced Features](/docs/advanced) - Self-healing, vision integration
+- [🧪 Testing](/docs/testing) - Quality assurance and validation
+- [📖 API Reference](/docs/api) - Complete method documentation

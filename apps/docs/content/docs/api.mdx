@@ -1,0 +1,342 @@
+---
+title: API Reference  
+description: Complete API documentation for Media SDK classes and methods
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# API Reference
+
+Complete reference for all Media SDK classes, methods, and types.
+
+## Timeline
+
+The core class for building video compositions.
+
+### Constructor
+
+```typescript
+new Timeline(layers?: TimelineLayer[], options?: Record<string, any>)
+```
+
+Creates a new Timeline instance.
+
+### Video Methods
+
+#### `addVideo(source, options?)`
+
+Adds a video layer to the timeline.
+
+```typescript
+timeline.addVideo('input.mp4', {
+  startTime: 2,     // Start at 2 seconds
+  duration: 10,     // Play for 10 seconds
+  trimStart: 5,     // Skip first 5 seconds of video
+  trimEnd: 15       // Stop at 15 seconds of video
+});
+```
+
+**Parameters:**
+- `source` (string) - Path to video file
+- `options` (VideoOptions) - Video configuration
+
+**VideoOptions:**
+- `start?: number` - Timeline start time
+- `duration?: number` - Playback duration  
+- `startTime?: number` - Alias for start
+- `trimStart?: number` - Trim from beginning
+- `trimEnd?: number` - Trim from end
+
+### Audio Methods
+
+#### `addAudio(source, options?)`
+
+Adds an audio layer to the timeline.
+
+```typescript
+timeline.addAudio('music.mp3', {
+  volume: 0.5,      // 50% volume
+  fadeIn: 2,        // 2 second fade in
+  fadeOut: 3,       // 3 second fade out
+  loop: true,       // Loop audio
+  startTime: 0      // Start immediately
+});
+```
+
+**AudioOptions:**
+- `volume?: number` - Volume level (0-1)
+- `fadeIn?: number` - Fade in duration
+- `fadeOut?: number` - Fade out duration
+- `startTime?: number` - Start time
+- `duration?: number` - Audio duration
+- `loop?: boolean` - Loop audio
+- `pan?: number` - Stereo panning (-1 to 1)
+
+### Text Methods
+
+#### `addText(content, options?)`
+
+Adds a text overlay to the timeline.
+
+```typescript
+timeline.addText('Hello World!', {
+  position: { x: 'center', y: 'center' },
+  style: {
+    fontSize: 48,
+    color: '#ffffff',
+    fontFamily: 'Arial Bold',
+    strokeColor: '#000000',
+    strokeWidth: 2
+  },
+  startTime: 2,
+  duration: 5
+});
+```
+
+**TextOptions:**
+- `position?: Position | string` - Text positioning
+- `style?: TextStyle` - Text styling
+- `startTime?: number` - When to show text
+- `duration?: number` - How long to show text
+
+**TextStyle:**
+- `fontSize?: number` - Font size in pixels
+- `fontFamily?: string` - Font family name
+- `color?: string` - Text color (hex/rgb/named)
+- `strokeColor?: string` - Outline color
+- `strokeWidth?: number` - Outline width
+- `backgroundColor?: string` - Background color
+
+### Image Methods
+
+#### `addImage(source, options?)`
+
+Adds an image overlay to the timeline.
+
+```typescript
+timeline.addImage('logo.png', {
+  position: { x: '10%', y: '10%' },
+  scale: 0.5,       // 50% size
+  opacity: 0.8,     // 80% opacity
+  duration: 'full', // Show for entire timeline
+  startTime: 0
+});
+```
+
+**ImageOptions:**
+- `position?: Position` - Image positioning
+- `scale?: number` - Scale factor (1.0 = original size)
+- `opacity?: number` - Opacity (0-1)
+- `duration?: number | 'full'` - Display duration
+- `startTime?: number` - Start time
+
+### Timeline Configuration
+
+#### `setResolution(width, height)`
+
+Sets the output video resolution.
+
+```typescript
+timeline.setResolution(1920, 1080); // 1080p
+timeline.setResolution(1080, 1920); // Vertical mobile
+```
+
+#### `setAspectRatio(ratio)`
+
+Sets the aspect ratio using common presets.
+
+```typescript
+timeline.setAspectRatio('16:9');  // YouTube/Desktop
+timeline.setAspectRatio('9:16');  // TikTok/Stories
+timeline.setAspectRatio('1:1');   // Instagram Square
+timeline.setAspectRatio('4:5');   // Instagram Portrait
+```
+
+#### `setDuration(seconds)`
+
+Sets the total timeline duration.
+
+```typescript
+timeline.setDuration(30); // 30 second video
+```
+
+### Functional Composition
+
+#### `pipe(transform)`
+
+Applies a transformation function to the timeline.
+
+```typescript
+const addBranding = (t: Timeline) => 
+  t.addImage('logo.png', { position: 'top-right' });
+
+const result = timeline
+  .addVideo('content.mp4')
+  .pipe(addBranding)
+  .setDuration(60);
+```
+
+### Command Generation
+
+#### `getCommand(outputPath, options?)`
+
+Generates the FFmpeg command string.
+
+```typescript
+const command = timeline.getCommand('output.mp4', {
+  quality: 'high',
+  codec: 'h264',
+  hardwareAcceleration: 'auto'
+});
+```
+
+**RenderOptions:**
+- `quality?: 'low' | 'medium' | 'high' | 'ultra'`
+- `format?: 'mp4' | 'webm' | 'mov' | 'avi'`
+- `codec?: 'h264' | 'h265' | 'vp9' | 'av1'`
+- `hardwareAcceleration?: 'auto' | 'cuda' | 'vaapi' | 'none'`
+
+### Serialization
+
+#### `toJSON()`
+
+Exports timeline to JSON format.
+
+```typescript
+const data = timeline.toJSON();
+// Save to file or send to API
+```
+
+#### `fromJSON(data)`
+
+Creates timeline from JSON data.
+
+```typescript
+const timeline = Timeline.fromJSON(data);
+```
+
+## Caption Classes
+
+### MultiCaptionEngine
+
+Advanced multi-language caption system.
+
+```typescript
+import { MultiCaptionEngine } from '@jamesaphoenix/media-sdk';
+
+const captionEngine = new MultiCaptionEngine();
+
+// Create language tracks
+const englishTrack = captionEngine.createTrack('en', 'English');
+const spanishTrack = captionEngine.createTrack('es', 'Español');
+
+// Add captions
+captionEngine.addCaption(englishTrack.id, {
+  text: 'Hello World!',
+  startTime: 0,
+  endTime: 3
+});
+```
+
+### SRTHandler
+
+SRT file format support.
+
+```typescript
+import { SRTHandler } from '@jamesaphoenix/media-sdk';
+
+const srtHandler = new SRTHandler();
+
+// Read SRT file
+const subtitles = await srtHandler.readSRTFile('movie.srt');
+
+// Write SRT file
+await srtHandler.writeSRTFile('output.srt', subtitles);
+```
+
+## FFmpeg Executor
+
+### FFmpegExecutor
+
+Execute FFmpeg commands with retries and monitoring.
+
+```typescript
+import { FFmpegExecutor } from '@jamesaphoenix/media-sdk';
+
+const executor = new FFmpegExecutor();
+
+const result = await executor.execute(command, {
+  timeout: 60000,      // 60 second timeout
+  retries: 3,          // Retry 3 times on failure
+  onProgress: (info) => {
+    console.log(`Progress: ${info.percent}%`);
+  }
+});
+```
+
+## Type Definitions
+
+### Position
+
+Positioning interface for text and images.
+
+```typescript
+interface Position {
+  x: number | string;  // Pixels or percentage
+  y: number | string;  // Pixels or percentage
+  anchor?: 'top-left' | 'top-center' | 'top-right' | 
+           'center-left' | 'center' | 'center-right' | 
+           'bottom-left' | 'bottom-center' | 'bottom-right';
+}
+```
+
+### TimeRange
+
+Time range specification.
+
+```typescript
+interface TimeRange {
+  start: number;
+  duration?: number;
+  end?: number;
+}
+```
+
+### ExecutionResult
+
+Result from FFmpeg execution.
+
+```typescript
+interface ExecutionResult {
+  success: boolean;
+  output: string;
+  error?: string;
+  duration: number;
+  size?: number;
+  command: string;
+}
+```
+
+<Callout type="info">
+  **Need more details?** Check out the [source code](https://github.com/jamesaphoenix/media-sdk) or [examples](/docs/examples) for complete usage patterns.
+</Callout>
+
+## Error Handling
+
+Media SDK uses TypeScript for type safety and descriptive error messages:
+
+```typescript
+try {
+  const timeline = new Timeline()
+    .addVideo('nonexistent.mp4')
+    .getCommand('output.mp4');
+} catch (error) {
+  console.error('Timeline error:', error.message);
+}
+```
+
+Common error types:
+- **File not found** - Invalid video/audio/image paths
+- **Invalid duration** - Negative or zero durations
+- **Resolution mismatch** - Incompatible video dimensions
+- **Codec errors** - Unsupported format combinations

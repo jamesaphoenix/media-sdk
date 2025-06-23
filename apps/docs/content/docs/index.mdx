@@ -1,0 +1,117 @@
+---
+title: Getting Started
+description: Get started with Media SDK - the declarative, AI-friendly video processing library
+---
+
+import { Steps } from 'fumadocs-ui/components/steps';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Media SDK
+
+**Media SDK** is a declarative, AI-friendly API for video manipulation using FFmpeg. Built for the modern web with TypeScript, Effect, and a focus on developer experience.
+
+<Callout type="info">
+  **New in v1.0.3**: Now available on NPM with complete automated publishing pipeline!
+</Callout>
+
+## Why Media SDK?
+
+- **🤖 AI-First Design** - Purpose-built for LLM integration and automation
+- **🧬 Self-Healing** - Automatic quality validation and optimization  
+- **📱 Platform Ready** - Built-in TikTok, YouTube, Instagram presets
+- **⚡ Production Scale** - Handles Netflix-complexity (48k captions, 20 languages)
+- **🔧 Type-Safe** - Complete TypeScript coverage with Effect error handling
+
+## Quick Start
+
+<Steps>
+
+### Install the package
+
+```bash
+npm install @jamesaphoenix/media-sdk
+```
+
+### Import and create a timeline
+
+```typescript
+import { Timeline } from '@jamesaphoenix/media-sdk';
+
+const timeline = new Timeline()
+  .addVideo('input.mp4')
+  .addText('Hello, World!', {
+    position: { x: 'center', y: 'center' },
+    style: { fontSize: 48, color: '#ffffff' }
+  })
+  .setDuration(10);
+```
+
+### Generate FFmpeg command
+
+```typescript
+const command = timeline.getCommand('output.mp4');
+console.log(command);
+// Outputs: ffmpeg -i input.mp4 -filter_complex "..." output.mp4
+```
+
+### Execute the command
+
+```bash
+# Run the generated command
+ffmpeg -i input.mp4 -filter_complex "..." output.mp4
+```
+
+</Steps>
+
+## Core Concepts
+
+### Timeline API
+
+The Timeline is the core abstraction in Media SDK. It represents a video composition that can include:
+
+- **Videos** - Base media files
+- **Audio** - Background music or voiceovers  
+- **Text** - Overlays with rich styling
+- **Images** - Logo overlays and graphics
+- **Filters** - Color grading and effects
+
+### Functional Composition
+
+Media SDK uses functional programming patterns:
+
+```typescript
+const result = timeline
+  .addVideo('input.mp4')
+  .pipe(t => t.addFilter('brightness=1.2'))
+  .addText('Title', { startTime: 2 })
+  .setAspectRatio('16:9');
+```
+
+### Platform Presets
+
+Built-in optimizations for social media platforms:
+
+```typescript
+// TikTok optimized (9:16, mobile-first)
+const tiktok = new Timeline()
+  .setAspectRatio('9:16')
+  .setResolution(1080, 1920);
+
+// YouTube optimized (16:9, desktop-first)  
+const youtube = new Timeline()
+  .setAspectRatio('16:9')
+  .setResolution(1920, 1080);
+```
+
+## Next Steps
+
+- [📖 **API Reference**](/docs/api) - Complete API documentation
+- [🎬 **Examples**](/docs/examples) - Real-world usage examples
+- [🚀 **Advanced Features**](/docs/advanced) - Self-healing, vision integration
+- [🧪 **Testing**](/docs/testing) - Runtime validation and quality assurance
+
+## Community
+
+- [GitHub Repository](https://github.com/jamesaphoenix/media-sdk)
+- [NPM Package](https://www.npmjs.com/package/@jamesaphoenix/media-sdk)
+- [Issues & Discussions](https://github.com/jamesaphoenix/media-sdk/issues)

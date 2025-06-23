@@ -1,0 +1,167 @@
+---
+title: Installation
+description: Complete installation guide for Media SDK across different environments
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Installation
+
+## Package Manager
+
+<Tabs items={['npm', 'pnpm', 'yarn', 'bun']}>
+  <Tab value="npm">
+    ```bash
+    npm install @jamesaphoenix/media-sdk
+    ```
+  </Tab>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add @jamesaphoenix/media-sdk
+    ```
+  </Tab>
+  <Tab value="yarn">
+    ```bash
+    yarn add @jamesaphoenix/media-sdk
+    ```
+  </Tab>
+  <Tab value="bun">
+    ```bash
+    bun add @jamesaphoenix/media-sdk
+    ```
+  </Tab>
+</Tabs>
+
+## FFmpeg Requirement
+
+Media SDK requires FFmpeg to be installed on your system:
+
+<Tabs items={['macOS', 'Windows', 'Linux', 'Docker']}>
+  <Tab value="macOS">
+    ```bash
+    # Using Homebrew
+    brew install ffmpeg
+    
+    # Using MacPorts
+    sudo port install ffmpeg
+    ```
+  </Tab>
+  <Tab value="Windows">
+    ```bash
+    # Using Chocolatey
+    choco install ffmpeg
+    
+    # Using Scoop
+    scoop install ffmpeg
+    
+    # Or download from https://ffmpeg.org/download.html#build-windows
+    ```
+  </Tab>
+  <Tab value="Linux">
+    ```bash
+    # Ubuntu/Debian
+    sudo apt update && sudo apt install ffmpeg
+    
+    # CentOS/RHEL/Fedora
+    sudo dnf install ffmpeg
+    
+    # Arch Linux
+    sudo pacman -S ffmpeg
+    ```
+  </Tab>
+  <Tab value="Docker">
+    ```dockerfile
+    FROM node:18-alpine
+    
+    # Install FFmpeg
+    RUN apk add --no-cache ffmpeg
+    
+    # Your app code
+    WORKDIR /app
+    COPY package*.json ./
+    RUN npm install
+    ```
+  </Tab>
+</Tabs>
+
+## Verify Installation
+
+Check that everything is working correctly:
+
+```typescript
+import { Timeline } from '@jamesaphoenix/media-sdk';
+
+// Create a simple timeline
+const timeline = new Timeline()
+  .addVideo('test.mp4')
+  .setDuration(5);
+
+// Generate command (doesn't execute)
+const command = timeline.getCommand('output.mp4');
+console.log('Generated command:', command);
+```
+
+Verify FFmpeg is available:
+
+```bash
+ffmpeg -version
+```
+
+<Callout type="warn">
+  Make sure FFmpeg is in your system PATH. Media SDK generates FFmpeg commands that need to be executed externally.
+</Callout>
+
+## TypeScript Configuration
+
+For optimal TypeScript experience, ensure your `tsconfig.json` includes:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext", 
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+## Environment Variables
+
+Optional configuration through environment variables:
+
+```bash
+# Enable vision validation (requires Gemini API key)
+GEMINI_API_KEY=your_api_key_here
+
+# Cassette mode for testing
+CASSETTE_MODE=record|replay|auto
+
+# Vision quality threshold
+VISION_QUALITY_THRESHOLD=0.75
+```
+
+## Runtime Requirements
+
+- **Node.js**: 18.0.0 or higher
+- **FFmpeg**: 4.0 or higher (6.0+ recommended)
+- **Memory**: 512MB minimum (2GB+ for complex operations)
+- **Disk**: Adequate space for temporary video files
+
+## Platform Support
+
+| Platform | Status | Notes |
+|----------|--------|-------|
+| macOS | ✅ Fully Supported | Best performance with Apple Silicon |
+| Linux | ✅ Fully Supported | Recommended for production |
+| Windows | ✅ Supported | WSL recommended for development |
+| Docker | ✅ Supported | Alpine and Ubuntu images tested |
+
+## Next Steps
+
+- [📖 API Reference](/docs/api) - Learn the complete API
+- [🎬 Examples](/docs/examples) - See practical usage examples
+- [🧪 Testing](/docs/testing) - Set up runtime validation
