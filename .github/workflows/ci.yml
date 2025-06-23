@@ -23,22 +23,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
       - name: Install dependencies
         run: |
           cd packages/media-sdk
-          npm ci
+          pnpm install
 
       - name: Build SDK
         run: |
           cd packages/media-sdk
-          npm run build
+          pnpm run build
 
       - name: Run unit tests
         run: |
           cd packages/media-sdk
-          npm test
+          pnpm test
 
   # Bun runtime tests
   bun-runtime-tests:
@@ -52,7 +56,6 @@ jobs:
         uses: FedericoCarboni/setup-ffmpeg@v3
         with:
           ffmpeg-version: release
-          github-token: ${{ github.server_url == 'https://github.com' && github.token || '' }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
