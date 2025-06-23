@@ -13,6 +13,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    outputs:
+      version_changed: ${{ steps.version-check.outputs.version_changed }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,11 +43,16 @@ jobs:
       - name: Check if version changed
         id: version-check
         run: |
+          echo "Files changed:"
+          git diff HEAD^ HEAD --name-only
           if git diff HEAD^ HEAD --name-only | grep -q "packages/media-sdk/package.json"; then
+            echo "Version changed detected!"
             echo "version_changed=true" >> $GITHUB_OUTPUT
           else
+            echo "No version change detected"
             echo "version_changed=false" >> $GITHUB_OUTPUT
           fi
+          echo "Output set to: $(cat $GITHUB_OUTPUT)"
   
   publish:
     needs: test
