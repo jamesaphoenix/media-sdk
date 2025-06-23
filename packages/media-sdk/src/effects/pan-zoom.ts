@@ -314,35 +314,139 @@ export function pan(
 
 /**
  * Create multiple pan/zoom effects in sequence
- * Note: This is a simplified version that applies effects to the same timeline
- * For true sequential effects, you would need to use multiple video inputs
+ * This creates a complex filter chain that transitions between multiple effects
  */
 export function multiPanZoom(
   timeline: Timeline,
   effects: Array<{
-    type: 'pan' | 'zoom-in' | 'zoom-out' | 'ken-burns';
+    type: 'pan' | 'zoom-in' | 'zoom-out' | 'ken-burns' | 'custom';
     duration: number;
     options?: any;
   }>
 ): Timeline {
-  // For now, just apply the first effect
-  // TODO: Implement proper sequential effects with multiple inputs
   if (effects.length === 0) return timeline;
   
-  const firstEffect = effects[0];
+  // Calculate total duration
+  const totalDuration = effects.reduce((sum, effect) => sum + effect.duration, 0);
   
-  switch (firstEffect.type) {
-    case 'pan':
-      return pan(timeline, { ...firstEffect.options, duration: firstEffect.duration });
-    case 'zoom-in':
-      return zoomIn(timeline, { ...firstEffect.options, duration: firstEffect.duration });
-    case 'zoom-out':
-      return zoomOut(timeline, { ...firstEffect.options, duration: firstEffect.duration });
-    case 'ken-burns':
-      return addKenBurns(timeline, { ...firstEffect.options, duration: firstEffect.duration });
-    default:
-      return timeline;
+  // Build sequential zoompan expressions
+  let currentTime = 0;
+  const zoomParts: string[] = [];
+  const xParts: string[] = [];
+  const yParts: string[] = [];
+  
+  for (const effect of effects) {
+    const startTime = currentTime;
+    const endTime = currentTime + effect.duration;
+    
+    let panZoomOptions: PanZoomOptions;
+    
+    switch (effect.type) {
+      case 'zoom-in':
+        panZoomOptions = generateKenBurns({
+          startZoom: effect.options?.startZoom || 1.0,
+          endZoom: effect.options?.zoom || 1.5,
+          direction: 'center-out',
+          duration: effect.duration,
+          easing: effect.options?.easing || 'ease-in-out'
+        });
+        break;
+        
+      case 'zoom-out':
+        panZoomOptions = generateKenBurns({
+          startZoom: effect.options?.zoom || 1.5,
+          endZoom: effect.options?.endZoom || 1.0,
+          direction: 'center-out',
+          duration: effect.duration,
+          easing: effect.options?.easing || 'ease-in-out'
+        });
+        break;
+        
+      case 'pan':
+        const direction = effect.options?.direction || 'right';
+        let kenBurnsDir: KenBurnsEffectOptions['direction'] = 'left-right';
+        if (direction === 'up' || direction === 'down') {
+          kenBurnsDir = 'top-bottom';
+        }
+        panZoomOptions = generateKenBurns({
+          startZoom: 1.0,
+          endZoom: 1.0,
+          direction: kenBurnsDir,
+          duration: effect.duration,
+          easing: effect.options?.easing || 'linear'
+        });
+        break;
+        
+      case 'ken-burns':
+        panZoomOptions = generateKenBurns({
+          ...effect.options,
+          duration: effect.duration
+        });
+        break;
+        
+      case 'custom':
+        panZoomOptions = effect.options as PanZoomOptions;
+        break;
+        
+      default:
+        continue;
+    }
+    
+    // Create time-gated expression for this effect
+    const timeCondition = effect === effects[effects.length - 1]
+      ? `gte(t,${startTime})`
+      : `between(t,${startTime},${endTime})`;
+    
+    // Adjust the pan/zoom calculations for the time window
+    const localT = `(t-${startTime})`;
+    const { startRect, endRect, easing = 'linear' } = panZoomOptions;
+    const inputRes = panZoomOptions.inputResolution || { width: 1920, height: 1080 };
+    
+    // Calculate zoom factors
+    const startZoom = Math.min(
+      inputRes.width / startRect.width,
+      inputRes.height / startRect.height
+    );
+    const endZoom = Math.min(
+      inputRes.width / endRect.width,
+      inputRes.height / endRect.height
+    );
+    
+    // Build easing expression for local time
+    let easingExpr = `${localT}/${effect.duration}`;
+    switch (easing) {
+      case 'ease-in':
+        easingExpr = `pow(${localT}/${effect.duration},2)`;
+        break;
+      case 'ease-out':
+        easingExpr = `1-pow(1-${localT}/${effect.duration},2)`;
+        break;
+      case 'ease-in-out':
+        easingExpr = `if(lt(${localT},${effect.duration}/2),2*pow(${localT}/${effect.duration},2),1-2*pow(1-${localT}/${effect.duration},2))`;
+        break;
+    }
+    
+    // Build expressions for this segment
+    const zoomExpr = `${startZoom}+${endZoom - startZoom}*${easingExpr}`;
+    const xExpr = `${startRect.x + startRect.width/2}+${endRect.x + endRect.width/2 - startRect.x - startRect.width/2}*${easingExpr}`;
+    const yExpr = `${startRect.y + startRect.height/2}+${endRect.y + endRect.height/2 - startRect.y - startRect.height/2}*${easingExpr}`;
+    
+    zoomParts.push(`if(${timeCondition},${zoomExpr},1)`);
+    xParts.push(`if(${timeCondition},${xExpr},iw/2)`);
+    yParts.push(`if(${timeCondition},${yExpr},ih/2)`);
+    
+    currentTime = endTime;
   }
+  
+  // Combine all expressions using nested conditionals
+  const combinedZoom = zoomParts.length === 1 ? zoomParts[0] : zoomParts.join('+');
+  const combinedX = xParts.length === 1 ? xParts[0] : xParts.join('+');
+  const combinedY = yParts.length === 1 ? yParts[0] : yParts.join('+');
+  
+  // Build final filter expression
+  const filterExpr = `z='${combinedZoom}':x='${combinedX}':y='${combinedY}':d=${Math.floor(totalDuration * 25)}:s=1920x1080:fps=25`;
+  
+  return timeline.addFilter('zoompan', { raw: filterExpr });
 }
 
 /**
@@ -421,6 +525,43 @@ export function suggestPanZoom(
   }
 }
 
+/**
+ * Create a cinematic sequence with multiple effects
+ */
+export function cinematicSequence(
+  timeline: Timeline,
+  options: {
+    style?: 'dramatic' | 'gentle' | 'dynamic' | 'documentary';
+    duration?: number;
+  } = {}
+): Timeline {
+  const { style = 'dramatic', duration = 10 } = options;
+  
+  const sequences: Record<string, Array<Parameters<typeof multiPanZoom>[1][0]>> = {
+    dramatic: [
+      { type: 'zoom-in', duration: duration * 0.3, options: { zoom: 1.2, easing: 'ease-in' } },
+      { type: 'pan', duration: duration * 0.4, options: { direction: 'right', easing: 'linear' } },
+      { type: 'zoom-in', duration: duration * 0.3, options: { zoom: 1.5, easing: 'ease-out' } }
+    ],
+    gentle: [
+      { type: 'ken-burns', duration: duration * 0.5, options: { startZoom: 1.0, endZoom: 1.1, direction: 'center-out' } },
+      { type: 'pan', duration: duration * 0.5, options: { direction: 'right', easing: 'ease-in-out' } }
+    ],
+    dynamic: [
+      { type: 'zoom-out', duration: duration * 0.2, options: { zoom: 1.3, easing: 'ease-out' } },
+      { type: 'pan', duration: duration * 0.3, options: { direction: 'left', easing: 'ease-in-out' } },
+      { type: 'zoom-in', duration: duration * 0.3, options: { zoom: 1.4, easing: 'ease-in-out' } },
+      { type: 'pan', duration: duration * 0.2, options: { direction: 'up', easing: 'ease-in' } }
+    ],
+    documentary: [
+      { type: 'pan', duration: duration * 0.6, options: { direction: 'right', easing: 'linear' } },
+      { type: 'zoom-in', duration: duration * 0.4, options: { zoom: 1.2, easing: 'ease-out' } }
+    ]
+  };
+  
+  return multiPanZoom(timeline, sequences[style]);
+}
+
 // Export for pipe() composition
 export const panZoomEffect = (options: PanZoomOptions) => 
   (timeline: Timeline) => addPanZoom(timeline, options);
@@ -436,3 +577,9 @@ export const zoomOutEffect = (options?: Parameters<typeof zoomOut>[1]) =>
 
 export const panEffect = (options?: Parameters<typeof pan>[1]) => 
   (timeline: Timeline) => pan(timeline, options);
+
+export const multiPanZoomEffect = (effects: Parameters<typeof multiPanZoom>[1]) =>
+  (timeline: Timeline) => multiPanZoom(timeline, effects);
+
+export const cinematicSequenceEffect = (options?: Parameters<typeof cinematicSequence>[1]) =>
+  (timeline: Timeline) => cinematicSequence(timeline, options);

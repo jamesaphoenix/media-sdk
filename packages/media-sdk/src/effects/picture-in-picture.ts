@@ -406,10 +406,144 @@ export class PictureInPicture {
       pipOptions.borderRadius = 15;
     }
 
-    // TODO: Add green screen removal if requested
-    // This would require chromakey filter implementation
+    // Add green screen removal if requested
+    if (greenScreen) {
+      const chromaOptions = {
+        ...pipOptions,
+        chromaKey: chromaKey
+      };
+      return PictureInPicture.addWithChromaKey(timeline, webcamSource, chromaOptions);
+    }
 
     return PictureInPicture.add(timeline, webcamSource, pipOptions);
+  }
+
+  /**
+   * Add picture-in-picture with chroma key (green screen) removal
+   * 
+   * @example
+   * ```typescript
+   * const withGreenScreen = PictureInPicture.addWithChromaKey(
+   *   timeline,
+   *   'webcam-greenscreen.mp4',
+   *   {
+   *     position: 'bottom-right',
+   *     scale: 0.3,
+   *     chromaKey: '#00FF00',
+   *     chromaSimilarity: 0.4,
+   *     chromaBlend: 0.1
+   *   }
+   * );
+   * ```
+   */
+  static addWithChromaKey(
+    timeline: Timeline,
+    videoSource: string,
+    options: PiPOptions & {
+      chromaKey?: string;
+      chromaSimilarity?: number;
+      chromaBlend?: number;
+      chromaYuv?: boolean;
+    } = {}
+  ): Timeline {
+    const {
+      chromaKey = '#00FF00',
+      chromaSimilarity = 0.4,
+      chromaBlend = 0.1,
+      chromaYuv = false,
+      ...pipOptions
+    } = options;
+
+    // Convert hex color to RGB values
+    const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16) / 255,
+        g: parseInt(result[2], 16) / 255,
+        b: parseInt(result[3], 16) / 255
+      } : { r: 0, g: 1, b: 0 }; // Default to green
+    };
+
+    const { r, g, b } = hexToRgb(chromaKey);
+
+    // Build chromakey filter
+    const chromaFilter = chromaYuv
+      ? `chromakey=color=0x${chromaKey.replace('#', '')}:similarity=${chromaSimilarity}:blend=${chromaBlend}:yuv=true`
+      : `chromakey=color=0x${chromaKey.replace('#', '')}:similarity=${chromaSimilarity}:blend=${chromaBlend}`;
+
+    // Calculate size
+    const scale = pipOptions.scale || 0.25;
+    const pipWidth = `iw*${scale}`;
+    const pipHeight = `ih*${scale}`;
+
+    // Calculate position
+    const { x, y } = this.calculatePosition(
+      pipOptions.position || 'bottom-right',
+      pipOptions.customPosition,
+      pipWidth,
+      pipHeight
+    );
+
+    // Build filter complex with chromakey
+    let filterComplex = `[1:v]scale=${pipWidth}:${pipHeight},${chromaFilter}`;
+
+    // Add additional effects
+    if (pipOptions.borderRadius && pipOptions.borderRadius > 0) {
+      // Rounded corners
+      filterComplex += `,geq=lum='if(gt(abs(X-W/2),W/2-${pipOptions.borderRadius})*gt(abs(Y-H/2),H/2-${pipOptions.borderRadius}),0,255)':a='if(gt(abs(X-W/2),W/2-${pipOptions.borderRadius})*gt(abs(Y-H/2),H/2-${pipOptions.borderRadius}),0,255)'`;
+    }
+
+    if (pipOptions.opacity && pipOptions.opacity < 1) {
+      filterComplex += `,format=rgba,colorchannelmixer=aa=${pipOptions.opacity}`;
+    }
+
+    // Add shadow if requested
+    if (pipOptions.shadow) {
+      const shadowOptions = typeof pipOptions.shadow === 'object' ? pipOptions.shadow : {
+        blur: 5,
+        color: 'black@0.5',
+        offsetX: 3,
+        offsetY: 3
+      };
+      
+      // Create shadow
+      filterComplex = `[1:v]scale=${pipWidth}:${pipHeight},${chromaFilter},` +
+        `colorchannelmixer=aa=0.5,` +
+        `boxblur=${shadowOptions.blur}:${shadowOptions.blur}[shadow];` +
+        filterComplex + `[pip];` +
+        `[0:v][shadow]overlay=${x + shadowOptions.offsetX}:${y + shadowOptions.offsetY}[bg];` +
+        `[bg][pip]overlay=${x}:${y}`;
+    } else {
+      filterComplex += `[pip];[0:v][pip]overlay=${x}:${y}`;
+    }
+
+    // Add time constraints
+    if (pipOptions.startTime || pipOptions.endTime) {
+      filterComplex += `:enable='between(t,${pipOptions.startTime || 0},${pipOptions.endTime || 'inf'})'`;
+    }
+
+    // Add the video and filter
+    let result = timeline.addVideo(videoSource, {
+      startTime: pipOptions.startTime,
+      duration: pipOptions.endTime ? pipOptions.endTime - (pipOptions.startTime || 0) : undefined
+    });
+
+    result = result.addFilter(filterComplex);
+
+    // Handle audio
+    if (pipOptions.audioMix !== 'mute') {
+      const volume = pipOptions.audioMix === 'duck' ? 0.3 : 
+                     pipOptions.audioMix === 'full' ? 1 : 
+                     typeof pipOptions.audioMix === 'number' ? pipOptions.audioMix : 0.5;
+      
+      result = result.addAudio(videoSource, {
+        startTime: pipOptions.startTime,
+        duration: pipOptions.endTime ? pipOptions.endTime - (pipOptions.startTime || 0) : undefined,
+        volume: volume
+      });
+    }
+
+    return result;
   }
 
   /**

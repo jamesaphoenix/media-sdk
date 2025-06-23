@@ -223,6 +223,16 @@ export const VisionServiceLive = Layer.effect(
             })
           }
           
+          if (mockAnalysis.visualQuality.contrast < 0.7) {
+            mockAnalysis.issues.push({
+              severity: "medium",
+              type: "visual",
+              description: "Low contrast detected",
+              suggestion: "Increase contrast to improve visibility",
+              autoFixAvailable: true
+            })
+          }
+          
           if (mockAnalysis.textDetection.readability < 0.85) {
             mockAnalysis.issues.push({
               severity: "high",
@@ -254,7 +264,11 @@ export const VisionServiceLive = Layer.effect(
                 issue: `Font size ${fontSize}px may be too small for mobile viewing`,
                 recommendation: `Increase font size to at least 32px for ${platform}`,
                 confidence: 0.9,
-                autoFix: Effect.succeed(timeline) // TODO: Implement actual fix
+                autoFix: Effect.succeed(
+                  // For now, return the original timeline with a note
+                  // In a real implementation, this would modify text layers
+                  timeline
+                )
               })
             }
           }
@@ -343,6 +357,29 @@ export const VisionServiceLive = Layer.effect(
               issue: "Overall video quality is below acceptable threshold",
               recommendation: "Consider increasing bitrate or resolution",
               confidence: 0.85
+            })
+          }
+          
+          // Add visual quality fixes
+          if (analysis.visualQuality.brightness < 0.8) {
+            recommendations.push({
+              type: "visual",
+              severity: "medium",
+              issue: "Video appears too dark",
+              recommendation: "Apply brightness filter to improve visibility",
+              confidence: 0.9,
+              autoFix: timeline.addFilter('eq=brightness=0.15')
+            })
+          }
+          
+          if (analysis.visualQuality.contrast < 0.7) {
+            recommendations.push({
+              type: "visual",
+              severity: "medium",
+              issue: "Low contrast detected",
+              recommendation: "Apply contrast enhancement filter",
+              confidence: 0.85,
+              autoFix: timeline.addFilter('eq=contrast=1.2')
             })
           }
           
