@@ -1,6 +1,6 @@
 {
   "name": "@jamesaphoenix/media-sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Declarative, AI-friendly API for video manipulation using FFmpeg. Features functional composition, real-world video rendering, and comprehensive runtime testing.",
   "type": "module",
   "main": "dist/index-simple.js",
