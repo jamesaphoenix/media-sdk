@@ -7,6 +7,11 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "test:tdd": "bun test --watch --reporter=verbose",
+    "test:new-features": "bun test new-features-runtime-comprehensive.test.ts",
+    "test:edge-cases": "bun test edge-cases-runtime.test.ts",
+    "test:real-world": "bun test real-world-compositions.test.ts",
+    "generate-tests": "bun scripts/generate-tests.ts",
+    "analyze-coverage": "bun src/combinatorial-test-generator.ts",
     "setup": "bun run setup-samples.ts",
     "clean": "rm -rf cassettes/* sample-files/* output/*",
     "record": "CASSETTE_MODE=record bun test",
@@ -16,7 +21,9 @@
     "@effect/platform": "^0.85.2",
     "@effect/platform-bun": "^0.70.5",
     "@jamesaphoenix/media-sdk": "file:../../packages/media-sdk",
-    "effect": "^3.16.8"
+    "@google/generative-ai": "^0.21.0",
+    "effect": "^3.16.8",
+    "glob": "^10.3.10"
   },
   "devDependencies": {
     "bun-types": "latest",
