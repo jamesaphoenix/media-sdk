@@ -3,13 +3,5 @@
   "buildCommand": "cd apps/docs && pnpm run build",
   "outputDirectory": "apps/docs/.next",
   "installCommand": "pnpm install --frozen-lockfile",
-  "devCommand": "cd apps/docs && pnpm run dev",
-  "framework": "nextjs",
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/docs",
-      "permanent": false
-    }
-  ]
+  "framework": "nextjs"
 }
