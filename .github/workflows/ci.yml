@@ -9,6 +9,7 @@ on:
 env:
   NODE_VERSION: '20'
   BUN_VERSION: 'latest'
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
 jobs:
   # Unit tests for the SDK
