@@ -66,6 +66,9 @@ rendered/
 cassettes/
 *.cassette.json
 
+# Vision usage tracking
+.vision-usage.json
+
 # Bun
 bun.lockb
 

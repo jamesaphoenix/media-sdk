@@ -6,6 +6,27 @@ import { writeFileSync, readFileSync, existsSync, mkdirSync, statSync } from 'fs
 import { join, resolve } from 'path';
 import { CassetteDependencyTracker } from './dependency-tracker';
 
+// Load cassette configuration
+let cassetteConfig: any = {
+  alwaysStore: true,
+  storageDirectory: './cassettes',
+  modes: {
+    ci: 'replay',
+    local: 'auto',
+    record: 'record'
+  }
+};
+
+try {
+  const configPath = join(process.cwd(), 'cassette.config.json');
+  if (existsSync(configPath)) {
+    const configData = JSON.parse(readFileSync(configPath, 'utf-8'));
+    cassetteConfig = configData.cassette || cassetteConfig;
+  }
+} catch (e) {
+  console.warn('Failed to load cassette config, using defaults');
+}
+
 export interface CassetteInteraction {
   id: string;
   command: string;
@@ -59,8 +80,22 @@ export class EnhancedBunCassetteManager {
     } = {}
   ) {
     this.cassetteName = cassetteName;
-    this.cassettePath = join('cassettes', `${cassetteName}.json`);
-    this.mode = options.mode || (process.env.CASSETTE_MODE as 'record' | 'replay' | 'auto') || 'auto';
+    this.cassettePath = join(cassetteConfig.storageDirectory || 'cassettes', `${cassetteName}.json`);
+    
+    // Determine mode based on environment
+    const envMode = process.env.CASSETTE_MODE;
+    const isCI = process.env.CI === 'true';
+    
+    if (envMode) {
+      this.mode = envMode as 'record' | 'replay' | 'auto';
+    } else if (isCI && cassetteConfig.modes?.ci) {
+      this.mode = cassetteConfig.modes.ci;
+    } else if (!isCI && cassetteConfig.modes?.local) {
+      this.mode = cassetteConfig.modes.local;
+    } else {
+      this.mode = options.mode || 'auto';
+    }
+    
     this.autoInvalidate = options.autoInvalidate ?? true;
     this.trackedFiles = new Set(options.trackedFiles || []);
     
@@ -166,7 +201,7 @@ export class EnhancedBunCassetteManager {
   }
 
   private saveCassette() {
-    const dir = 'cassettes';
+    const dir = cassetteConfig.storageDirectory || 'cassettes';
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true });
     }
@@ -176,7 +211,11 @@ export class EnhancedBunCassetteManager {
       this.updateDependencies();
     }
     
-    writeFileSync(this.cassettePath, JSON.stringify(this.interactions, null, 2));
+    // Always save cassettes when alwaysStore is true
+    if (cassetteConfig.alwaysStore || this.mode === 'record') {
+      writeFileSync(this.cassettePath, JSON.stringify(this.interactions, null, 2));
+      console.log(`💾 Cassette saved: ${this.cassettePath}`);
+    }
   }
 
   async executeCommand(command: string, options: { cwd?: string } = {}): Promise<ExecutionResult> {

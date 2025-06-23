@@ -1,0 +1,20 @@
+{
+  "cassette": {
+    "alwaysStore": true,
+    "storageDirectory": "./cassettes",
+    "modes": {
+      "ci": "replay",
+      "local": "auto",
+      "record": "record"
+    },
+    "invalidateOnDependencyChange": true,
+    "visionAnalysis": {
+      "enabled": true,
+      "costControl": {
+        "skipInCI": false,
+        "maxRequestsPerRun": 10,
+        "fallbackToMock": true
+      }
+    }
+  }
+}
