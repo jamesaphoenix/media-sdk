@@ -77,10 +77,16 @@ jobs:
       - name: Run Bun tests
         run: |
           cd apps/bun-runtime
-          echo "Running specific test file first..."
-          bun test image-caption-examples.test.ts --timeout 30000 || true
-          echo "Running all tests..."
-          bun test --timeout 30000 || echo "Some tests failed"
+          # Run minimal test suite for CI
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "Running minimal CI test suite..."
+            bun test ci-minimal.test.ts --timeout 30000
+          else
+            echo "Running comprehensive test suite for PRs..."
+            bun test image-caption-examples.test.ts --timeout 30000 || true
+            echo "Running all tests..."
+            bun test --timeout 30000 || echo "Some tests failed"
+          fi
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

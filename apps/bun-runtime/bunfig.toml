@@ -1,0 +1,14 @@
+# Bun configuration for test runner
+
+[test]
+# Reduce concurrency for CI
+concurrency = 2
+
+# Set reasonable timeouts
+timeout = 30000
+
+# Fail fast on first error in CI
+bail = 1
+
+# Preload setup
+preload = ["./test-setup.ts"]
