@@ -189,10 +189,7 @@ export class PictureInPicture {
       duration: endTime ? endTime - startTime : undefined
     });
 
-    result = result.addFilter({
-      name: 'custom',
-      options: { filter: filterComplex }
-    });
+    result = result.addFilter(filterComplex);
 
     // Handle audio
     if (audioMix !== 'mute') {

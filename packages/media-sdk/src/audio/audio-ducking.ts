@@ -119,10 +119,7 @@ export class AudioDucking {
     }
 
     // Apply the ducking filter
-    return timeline.addFilter({
-      name: 'custom',
-      options: { filter: duckingFilter }
-    });
+    return timeline.addFilter(duckingFilter);
   }
 
   /**

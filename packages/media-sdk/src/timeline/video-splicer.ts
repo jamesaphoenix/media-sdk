@@ -270,25 +270,10 @@ export class VideoSplicer {
         return timeline.fadeOut(duration, transitionStart);
       case 'dissolve':
         // Dissolve is similar to fade but with different alpha curve
-        return timeline.addFilter({
-          name: 'fade',
-          options: {
-            type: 'out',
-            start_time: transitionStart,
-            duration: duration,
-            alpha: 1
-          }
-        });
+        return timeline.addFilter(`fade=type=out:start_time=${transitionStart}:duration=${duration}:alpha=1`);
       case 'wipe':
         // Wipe transition (simplified - would need more complex filter)
-        return timeline.addFilter({
-          name: 'xfade',
-          options: {
-            transition: 'wipeleft',
-            duration: duration,
-            offset: transitionStart
-          }
-        });
+        return timeline.addFilter(`xfade=transition=wipeleft:duration=${duration}:offset=${transitionStart}`);
       default:
         return timeline;
     }
