@@ -76,7 +76,10 @@ jobs:
       - name: Run Bun tests
         run: |
           cd apps/bun-runtime
-          bun test --timeout 60000 || echo "Some tests failed"
+          echo "Running specific test file first..."
+          bun test image-caption-examples.test.ts --timeout 30000 || true
+          echo "Running all tests..."
+          bun test --timeout 30000 || echo "Some tests failed"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
