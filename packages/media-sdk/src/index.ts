@@ -223,3 +223,78 @@ export type {
   VideoQueryOptions,
   VideoQueryResult
 } from './query/video-query.js';
+
+// Vision integration service
+export * from './services/vision-integration.js';
+
+// Timelapse functionality
+export {
+  TimelapseBuilder,
+  createTimelapse,
+  quickTimelapse,
+  instagramTimelapse,
+  cinematicTimelapse
+} from './timelapse/timelapse-builder.js';
+
+export type {
+  TimelapseImage,
+  TimelapseOptions,
+  SpeedRamp,
+  TimelapseEffect
+} from './timelapse/timelapse-builder.js';
+
+// Frame exporter
+export {
+  FrameExporter,
+  createFrameExporter,
+  extractFrames,
+  extractKeyFrames
+} from './timelapse/frame-exporter.js';
+
+export type {
+  FrameExportOptions,
+  ExportedFrame,
+  KeyFrameOptions
+} from './timelapse/frame-exporter.js';
+
+// Advanced transition engine
+export {
+  TransitionEngine
+} from './transitions/transition-engine.js';
+
+export type {
+  TransitionType,
+  EasingFunction,
+  TransitionDirection,
+  TransitionOptions,
+  TransitionPoint
+} from './transitions/transition-engine.js';
+
+// Multi-caption engine
+export {
+  MultiCaptionEngine
+} from './captions/multi-caption-engine.js';
+
+export type {
+  CaptionTrack,
+  CaptionEntry,
+  CaptionStyle,
+  CaptionAnimation,
+  SyncOptions,
+  CaptionFormat
+} from './captions/multi-caption-engine.js';
+
+// Multi-resolution renderer
+export {
+  MultiResolutionRenderer
+} from './rendering/multi-resolution-renderer.js';
+
+export type {
+  Resolution,
+  QualityPreset,
+  PlatformOptimization,
+  BatchRenderConfig,
+  BatchRenderProgress,
+  RenderResult,
+  RenderError
+} from './rendering/multi-resolution-renderer.js';

@@ -334,10 +334,11 @@ describe('Timeline', () => {
   describe('Immutability', () => {
     it('should maintain immutability', () => {
       const original = timeline.addVideo('test.mp4');
-      const modified = original.addText('Hello');
+      const modified = original.addText('Hello', { startTime: 35, duration: 5 });
       
       expect(original).not.toBe(modified);
-      expect(original.getDuration()).not.toBe(modified.getDuration());
+      expect(original.getDuration()).toBe(30); // Original video duration
+      expect(modified.getDuration()).toBe(40); // Extended by text overlay
     });
 
     it('should allow branching', () => {

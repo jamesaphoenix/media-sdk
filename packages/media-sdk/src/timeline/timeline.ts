@@ -98,7 +98,11 @@ export class Timeline {
    * const timeline = new Timeline(existingLayers, globalOptions);
    * ```
    */
-  constructor(layers: TimelineLayer[] = [], options: Record<string, any> = {}) {
+  static create(): Timeline {
+    return new Timeline();
+  }
+
+    constructor(layers: TimelineLayer[] = [], options: Record<string, any> = {}) {
     this.layers = [...layers];
     this.globalOptions = { ...options };
   }
@@ -400,26 +404,42 @@ export class Timeline {
    */
   concat(other: Timeline): Timeline {
     const currentDuration = this.getDuration();
-    const offsetLayers = other.layers.map(layer => ({
+    
+    // Shift all layers from other timeline by current duration
+    const shiftedLayers = other.layers.map(layer => ({
       ...layer,
-      startTime: layer.startTime + currentDuration
+      startTime: (layer.startTime || 0) + currentDuration
     }));
-
-    return new Timeline([...this.layers, ...offsetLayers], this.globalOptions);
+    
+    return new Timeline(
+      [...this.layers, ...shiftedLayers],
+      this.globalOptions,
+      this.lastVideoStream,
+      this.lastAudioStream
+    );
   }
 
   /**
    * Get estimated duration of the timeline
    */
   getDuration(): number {
-    if (this.layers.length === 0) return 0;
-
-    return Math.max(
-      ...this.layers.map(layer => {
-        const endTime = layer.startTime + (layer.duration || 0);
-        return endTime;
-      })
-    );
+    if (this.globalOptions.duration) {
+      return this.globalOptions.duration;
+    }
+    
+    if (this.layers.length === 0) {
+      return 0;
+    }
+    
+    // Calculate duration based on all layers
+    let maxDuration = 0;
+    for (const layer of this.layers) {
+      const layerEnd = (layer.startTime || 0) + (layer.duration || 
+        (layer.type === 'video' || layer.type === 'audio' ? 30 : 5)); // Default durations
+      maxDuration = Math.max(maxDuration, layerEnd);
+    }
+    
+    return maxDuration;
   }
 
   /**
@@ -463,6 +483,42 @@ export class Timeline {
   }
 
   /**
+   * Detect if this is a sequential timelapse
+   */
+  private isSequentialTimelapse(): boolean {
+    const imageLayers = this.layers.filter(l => l.type === 'image');
+    const videoLayers = this.layers.filter(l => l.type === 'video');
+    
+    console.log('isSequentialTimelapse check: images=', imageLayers.length, 'videos=', videoLayers.length);
+    
+    // Must have multiple images and no video
+    if (imageLayers.length <= 1 || videoLayers.length > 0) {
+      console.log('Not a timelapse - early return');
+      return false;
+    }
+    
+    // Sort images by start time
+    const sortedImages = imageLayers.slice().sort((a, b) => (a.startTime || 0) - (b.startTime || 0));
+    
+    // Check if images are sequential (non-overlapping)
+    for (let i = 0; i < sortedImages.length - 1; i++) {
+      const currentEnd = (sortedImages[i].startTime || 0) + (sortedImages[i].duration || 0.5);
+      const nextStart = sortedImages[i + 1].startTime || 0;
+      // Debug logging
+      if (sortedImages.length === 5) {
+        console.log(`Image ${i}: start=${sortedImages[i].startTime}, end=${currentEnd}, next start=${nextStart}, overlap=${currentEnd > nextStart}, sequential=${currentEnd <= nextStart + 0.01}`);
+      }
+      if (currentEnd > nextStart + 0.01) { // Small tolerance for floating point
+        console.log(`Not sequential: currentEnd=${currentEnd} > nextStart=${nextStart}`);
+        return false;
+      }
+    }
+    
+    console.log('IS SEQUENTIAL TIMELAPSE: TRUE');
+    return true;
+  }
+
+  /**
    * Build FFmpeg command structure
    */
   private buildFFmpegCommand(outputPath: string, options: RenderOptions): FFmpegCommand {
@@ -490,10 +546,15 @@ export class Timeline {
       }
     }
 
-    // Build filter complex
-    const filterComplex = this.buildFilterComplex();
-    if (filterComplex) {
-      filters.push(filterComplex);
+    // Build filter complex (skip for sequential timelapse)
+    const isSequentialTimelapse = this.isSequentialTimelapse();
+    
+    // Only build filter complex if not a sequential timelapse
+    if (!isSequentialTimelapse) {
+      const filterComplex = this.buildFilterComplex();
+      if (filterComplex) {
+        filters.push(filterComplex);
+      }
     }
 
     // Add quality/encoding options
@@ -1076,16 +1137,42 @@ export class Timeline {
   private commandToString(command: FFmpegCommand): string {
     const parts: string[] = ['ffmpeg'];
     
-    // Add inputs
-    command.inputs.forEach(input => {
-      parts.push('-i', input);
+    // Check if we're creating a sequential timelapse
+    const imageLayers = this.layers.filter(l => l.type === 'image');
+    const isSequentialTimelapse = this.isSequentialTimelapse();
+    
+    // Add inputs with proper options
+    command.inputs.forEach((input, index) => {
+      // Check if this input is an image
+      const isImage = imageLayers.some(layer => layer.source === input);
+      
+      if (isImage && isSequentialTimelapse) {
+        // For sequential timelapse, add images with specific duration
+        const imageLayer = imageLayers.find(l => l.source === input);
+        const duration = imageLayer?.duration || 0.5;
+        parts.push('-loop', '1', '-t', duration.toString(), '-i', input);
+      } else if (isImage) {
+        // Single image or overlapping images - add loop and duration
+        const imageLayer = imageLayers.find(l => l.source === input);
+        const duration = imageLayer?.duration || 5;
+        parts.push('-loop', '1', '-t', duration.toString(), '-i', input);
+      } else {
+        // Regular input (video/audio)
+        parts.push('-i', input);
+      }
     });
 
     // Add options
     parts.push(...command.options);
 
-    // Add filter complex
-    if (command.filters.length > 0) {
+    // For sequential timelapse, add concat filter if not already present
+    if (isSequentialTimelapse && command.filters.length === 0) {
+      const concatFilter = imageLayers.map((_, i) => `[${i}:v]`).join('') + 
+        `concat=n=${imageLayers.length}:v=1:a=0[v]`;
+      parts.push('-filter_complex', `"${concatFilter}"`);
+      parts.push('-map', '[v]');
+    } else if (command.filters.length > 0) {
+      // Regular filter complex
       parts.push('-filter_complex', `"${command.filters.join(';')}"`);
       
       // Map the output from filter_complex if we have a final stream
@@ -1096,11 +1183,33 @@ export class Timeline {
       // Map audio output if we have mixed audio
       if (this.lastAudioStream) {
         parts.push('-map', this.lastAudioStream);
-      } else if (command.inputs.length > 1) {
+      } else if (command.inputs.length > 1 && !isSequentialTimelapse) {
         // If we have multiple inputs but no audio mixing, just use first audio
         parts.push('-map', '0:a?');
       }
     }
+
+    // Add codec and format options
+    if (!command.options.some(opt => opt.includes('-c:v'))) {
+      parts.push('-c:v', 'h264');
+    }
+    if (!command.options.some(opt => opt.includes('-pix_fmt'))) {
+      parts.push('-pix_fmt', 'yuv420p');
+    }
+    if (!isSequentialTimelapse && !command.options.some(opt => opt.includes('-c:a'))) {
+      parts.push('-c:a', 'aac');
+    }
+    
+    // Add quality settings
+    if (!command.options.some(opt => opt.includes('-crf'))) {
+      parts.push('-crf', '23');
+    }
+    if (!command.options.some(opt => opt.includes('-preset'))) {
+      parts.push('-preset', 'medium');
+    }
+
+    // Add overwrite flag
+    parts.push('-y');
 
     // Add outputs
     parts.push(...command.outputs);
@@ -1461,7 +1570,9 @@ export class Timeline {
     } else if (text) {
       words = this.generateWordTimings(text, startTime, duration, wordsPerSecond);
     } else {
-      throw new Error('Either text or words array must be provided');
+      // Handle empty input gracefully
+      console.warn('addWordHighlighting: No text or words provided, returning unchanged timeline');
+      return this;
     }
 
     // Group words into lines if needed
@@ -1537,7 +1648,37 @@ export class Timeline {
   /**
    * Generate word timings from text
    */
-  private generateWordTimings(
+  validateForPlatform(platform: string): any {
+    // Basic platform validation
+    const validPlatforms = ['tiktok', 'instagram', 'youtube', 'twitter', 'linkedin'];
+    if (!validPlatforms.includes(platform)) {
+      throw new Error(`Invalid platform: ${platform}`);
+    }
+    
+    const aspectRatios: Record<string, string> = {
+      tiktok: '9:16',
+      instagram: '1:1',
+      youtube: '16:9',
+      twitter: '16:9',
+      linkedin: '16:9'
+    };
+    
+    const currentAspectRatio = this.globalOptions.aspectRatio;
+    const expectedRatio = aspectRatios[platform];
+    
+    return {
+      isValid: currentAspectRatio === expectedRatio,
+      warnings: currentAspectRatio !== expectedRatio 
+        ? [`${platform} videos should use ${expectedRatio} aspect ratio`]
+        : [],
+      errors: [],
+      suggestions: currentAspectRatio !== expectedRatio
+        ? [`Use timeline.setAspectRatio("${expectedRatio}")`]
+        : []
+    };
+  }
+
+    private generateWordTimings(
     text: string, 
     startTime: number, 
     duration: number, 
