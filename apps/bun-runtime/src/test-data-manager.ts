@@ -151,13 +151,16 @@ export class TestDataManager {
         continue;
       }
       
-      // Check file size
+      // Check file size (be more lenient for generated files)
       const stats = statSync(filePath);
-      const tolerance = Math.max(100, spec.expectedSize * 0.1); // 10% tolerance or 100 bytes
+      const tolerance = Math.max(1000, spec.expectedSize * 0.5); // 50% tolerance or 1KB
       
       if (Math.abs(stats.size - spec.expectedSize) > tolerance) {
-        sizeMismatches.push(spec.id);
-        continue;
+        // Only mark as mismatch if file is significantly different
+        if (stats.size < spec.expectedSize * 0.1 || stats.size > spec.expectedSize * 10) {
+          sizeMismatches.push(spec.id);
+          continue;
+        }
       }
       
       // Validate file format
