@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -51,6 +53,8 @@ jobs:
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && needs.test.outputs.version_changed == 'true')
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       
       - name: Install pnpm
         uses: pnpm/action-setup@v2
