@@ -478,6 +478,161 @@ async function batchProcessVideos(inputDir: string, outputDir: string) {
   **Performance Tip**: For batch processing, consider using the `FFmpegExecutor` with parallel processing limits to avoid overwhelming your system.
 </Callout>
 
+## Green Screen Memes
+
+Create viral memes by removing green screens and replacing backgrounds with funny content.
+
+```typescript
+import { Timeline, PictureInPicture } from '@jamesaphoenix/media-sdk';
+
+// Basic green screen meme
+const timeline = Timeline.create()
+  .addVideo('explosion-background.mp4')
+  .setAspectRatio('9:16'); // TikTok format
+
+const meme = PictureInPicture.addWithChromaKey(timeline, 'person-greenscreen.mp4', {
+  position: 'center',
+  scale: 0.5,
+  chromaKey: '#00FF00',
+  chromaSimilarity: 0.4,
+  chromaBlend: 0.1,
+  animation: 'zoom-in'
+});
+
+// Add meme text
+const withText = meme
+  .addText('When you realize', {
+    position: { x: 'center', y: '10%' },
+    style: {
+      fontSize: 48,
+      color: '#ffffff',
+      fontFamily: 'Impact',
+      strokeColor: '#000000',
+      strokeWidth: 3
+    },
+    duration: 2
+  })
+  .addText('IT\'S MONDAY', {
+    position: { x: 'center', y: '85%' },
+    style: {
+      fontSize: 64,
+      color: '#ff0000',
+      fontFamily: 'Impact',
+      strokeColor: '#000000',
+      strokeWidth: 4
+    },
+    startTime: 2,
+    duration: 3
+  });
+```
+
+### Multi-Layer Reaction Memes
+
+```typescript
+// Multiple people reacting
+let meme = timeline;
+
+// Add shocked person
+meme = PictureInPicture.addWithChromaKey(meme, 'person1-shocked.mp4', {
+  position: 'custom',
+  customPosition: { x: '20%', y: '50%' },
+  scale: 0.3,
+  chromaKey: '#00FF00',
+  animation: 'slide-in',
+  animationDelay: 0.5
+});
+
+// Add laughing person
+meme = PictureInPicture.addWithChromaKey(meme, 'person2-laughing.mp4', {
+  position: 'custom',
+  customPosition: { x: '70%', y: '40%' },
+  scale: 0.35,
+  chromaKey: '#00FF00',
+  animation: 'slide-in',
+  animationDelay: 1.0,
+  flipHorizontal: true // Face the other person
+});
+```
+
+### Gaming Streamer Overlay
+
+```typescript
+// Game footage background
+const timeline = Timeline.create()
+  .addVideo('epic-fail-gameplay.mp4')
+  .setAspectRatio('16:9');
+
+// Add streamer with different reactions
+const calmReaction = PictureInPicture.addWithChromaKey(timeline, 'streamer-calm.mp4', {
+  position: 'bottom-left',
+  scale: 0.25,
+  chromaKey: '#00FF00',
+  borderRadius: 999, // Circle webcam
+  startTime: 0,
+  endTime: 5
+});
+
+const rageReaction = PictureInPicture.addWithChromaKey(calmReaction, 'streamer-rage.mp4', {
+  position: 'bottom-left',
+  scale: 0.35,
+  chromaKey: '#00FF00',
+  borderRadius: 999,
+  borderWidth: 5,
+  borderColor: '#ff0000',
+  shadow: {
+    blur: 10,
+    color: 'red',
+    offsetX: 0,
+    offsetY: 0
+  },
+  startTime: 10,
+  endTime: 15
+});
+```
+
+### Weather Reporter Meme
+
+```typescript
+const weatherMeme = Timeline.create()
+  .addVideo('weather-chaos-background.mp4')
+  .setAspectRatio('16:9');
+
+// Add weather person
+const withReporter = PictureInPicture.addWithChromaKey(weatherMeme, 'person-pointing.mp4', {
+  position: 'custom',
+  customPosition: { x: '25%', y: '50%' },
+  scale: 0.7,
+  chromaKey: '#00FF00',
+  audioMix: 'full' // Keep their audio
+});
+
+// Add weather graphics
+const complete = withReporter
+  .addImage('weather-map.png', {
+    position: { x: '70%', y: '30%' },
+    scale: 0.4,
+    opacity: 0.9
+  })
+  .addText('TODAY\'S FORECAST: CHAOS', {
+    position: { x: '70%', y: '80%' },
+    style: {
+      fontSize: 32,
+      color: '#ffff00',
+      backgroundColor: '#000000',
+      padding: 10
+    }
+  });
+```
+
+<Callout type="tip">
+  **Pro Tips for Green Screen Memes:**
+  - Use `chromaSimilarity` 0.3-0.5 for best results
+  - Add `chromaBlend` 0.1-0.2 for smoother edges
+  - Good lighting on green screen is crucial
+  - Consider `flipHorizontal` for interaction scenes
+  - Layer multiple reactions for comedy gold
+</Callout>
+
 ## Next Steps
 
 - [🚀 Advanced Features](/docs/advanced) - Self-healing, vision integration

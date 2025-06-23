@@ -220,8 +220,8 @@ function generateKenBurns(options: KenBurnsEffectOptions, inputResolution = { wi
 export function addPanZoom(timeline: Timeline, options: PanZoomOptions): Timeline {
   const filterExpr = calculateZoomPan(options);
   
-  // Pass the raw filter expression string
-  return timeline.addFilter('zoompan', { raw: filterExpr });
+  // Pass the complete zoompan filter expression
+  return timeline.addFilter(`zoompan=${filterExpr}`);
 }
 
 /**
@@ -446,7 +446,7 @@ export function multiPanZoom(
   // Build final filter expression
   const filterExpr = `z='${combinedZoom}':x='${combinedX}':y='${combinedY}':d=${Math.floor(totalDuration * 25)}:s=1920x1080:fps=25`;
   
-  return timeline.addFilter('zoompan', { raw: filterExpr });
+  return timeline.addFilter(`zoompan=${filterExpr}`);
 }
 
 /**
