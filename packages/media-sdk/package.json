@@ -1,7 +1,7 @@
 {
   "name": "@jamesaphoenix/media-sdk",
   "version": "1.0.0",
-  "description": "Declarative, LLM-friendly API for video editing using FFmpeg",
+  "description": "Declarative, AI-friendly API for video manipulation using FFmpeg. Features functional composition, real-world video rendering, and comprehensive runtime testing.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -47,8 +47,14 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run clean && npm run build && npm run test",
+    "publish:patch": "npm version patch && npm publish",
+    "publish:minor": "npm version minor && npm publish",
+    "publish:major": "npm version major && npm publish",
+    "publish:beta": "npm version prerelease --preid=beta && npm publish --tag beta"
   },
   "dependencies": {
     "@effect/platform": "^0.85.2",
@@ -74,12 +80,42 @@
     "declarative",
     "functional",
     "effect",
-    "effect-ts"
+    "effect-ts",
+    "video-processing",
+    "video-editing",
+    "media-sdk",
+    "tiktok",
+    "youtube",
+    "instagram",
+    "social-media",
+    "audio-ducking",
+    "picture-in-picture",
+    "video-splicing",
+    "captions",
+    "typescript",
+    "runtime-testing",
+    "self-healing",
+    "vision-validation"
   ],
   "author": "James Phoenix",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/jamesaphoenix/media-sdk"
+  },
+  "homepage": "https://github.com/jamesaphoenix/media-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/jamesaphoenix/media-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
