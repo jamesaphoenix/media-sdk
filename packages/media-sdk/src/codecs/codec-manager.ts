@@ -330,7 +330,12 @@ export class CodecManager {
     
     if (type !== 'none' && type !== 'auto') {
       const hwProfile = HardwareAccelerationProfiles[type];
-      if (this.config.video) {
+      if (hwProfile) {
+        // Initialize video config if it doesn't exist
+        if (!this.config.video) {
+          this.config.video = { codec: '', options: {} };
+        }
+        
         this.config.video.codec = hwProfile.encoder;
         this.config.video.options = {
           ...this.config.video.options,
@@ -356,16 +361,22 @@ export class CodecManager {
 
     const supportedCodecs = CodecCompatibility.containers[container as keyof typeof CodecCompatibility.containers] || [];
     
-    if (this.config.video && !supportedCodecs.includes(this.config.video.codec.replace('lib', ''))) {
-      compatible = false;
-      warnings.push(`Video codec ${this.config.video.codec} not supported in ${container} container`);
-      alternatives.push(...supportedCodecs.filter(c => ['h264', 'h265', 'vp9'].includes(c)));
+    if (this.config.video) {
+      // Map codec names to standard names for compatibility checking
+      const videoCodecName = this.config.video.codec.replace('lib', '').replace('x264', 'h264').replace('x265', 'h265');
+      if (!supportedCodecs.includes(videoCodecName)) {
+        compatible = false;
+        warnings.push(`Video codec ${this.config.video.codec} not supported in ${container} container`);
+        alternatives.push(...supportedCodecs.filter(c => ['h264', 'h265', 'vp9'].includes(c)));
+      }
     }
 
-    if (this.config.audio && !supportedCodecs.includes(this.config.audio.codec)) {
-      compatible = false;
-      warnings.push(`Audio codec ${this.config.audio.codec} not supported in ${container} container`);
-      alternatives.push(...supportedCodecs.filter(c => ['aac', 'opus', 'mp3'].includes(c)));
+    if (this.config.audio) {
+      if (!supportedCodecs.includes(this.config.audio.codec)) {
+        compatible = false;
+        warnings.push(`Audio codec ${this.config.audio.codec} not supported in ${container} container`);
+        alternatives.push(...supportedCodecs.filter(c => ['aac', 'opus', 'mp3'].includes(c)));
+      }
     }
 
     if (platform) {
@@ -379,18 +390,26 @@ export class CodecManager {
   }
 
   /**
-   * Generate FFmpeg codec arguments
+   * Get hardware acceleration arguments (should be placed before inputs)
    */
-  getFFmpegArgs(): string[] {
+  getHardwareAccelArgs(): string[] {
     const args: string[] = [];
-
-    // Hardware acceleration
+    
     if (this.hardwareAcceleration === 'auto') {
       args.push('-hwaccel', 'auto');
     } else if (this.hardwareAcceleration !== 'none') {
       const hwType = this.hardwareAcceleration;
       args.push('-hwaccel', hwType);
     }
+    
+    return args;
+  }
+
+  /**
+   * Generate FFmpeg codec arguments
+   */
+  getFFmpegArgs(): string[] {
+    const args: string[] = [];
 
     // Video codec
     if (this.config.video) {
@@ -399,7 +418,7 @@ export class CodecManager {
       const opts = this.config.video.options;
       if (opts) {
         if (opts.preset) args.push('-preset', opts.preset);
-        if (opts.crf !== undefined) args.push('-crf', opts.crf.toString());
+        if (opts.crf !== undefined && opts.crf !== null) args.push('-crf', opts.crf.toString());
         if (opts.profile) args.push('-profile:v', opts.profile);
         if (opts.level) args.push('-level', opts.level);
         if (opts.pixelFormat) args.push('-pix_fmt', opts.pixelFormat);

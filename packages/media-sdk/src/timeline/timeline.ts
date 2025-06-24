@@ -356,7 +356,7 @@ export class Timeline {
       aspectRatio: ratio
     };
 
-    return new Timeline(this.layers, newOptions);
+    return new Timeline(this.layers, newOptions, this.codecManager);
   }
 
   /**
@@ -621,7 +621,7 @@ export class Timeline {
       startTime: 0
     };
 
-    return new Timeline([...this.layers, layer], this.globalOptions);
+    return new Timeline([...this.layers, layer], this.globalOptions, this.codecManager);
   }
 
   /**
@@ -1372,6 +1372,12 @@ export class Timeline {
   private commandToString(command: FFmpegCommand): string {
     const parts: string[] = ['ffmpeg'];
     
+    // Add hardware acceleration flags before inputs
+    if (this.codecManager) {
+      const hwArgs = this.codecManager.getHardwareAccelArgs();
+      parts.push(...hwArgs);
+    }
+    
     // Check if we're creating a sequential timelapse
     const imageLayers = this.layers.filter(l => l.type === 'image');
     const isSequentialTimelapse = this.isSequentialTimelapse();
@@ -1663,7 +1669,7 @@ export class Timeline {
       };
     });
 
-    return new Timeline([...this.layers, ...captionLayers], this.globalOptions);
+    return new Timeline([...this.layers, ...captionLayers], this.globalOptions, this.codecManager);
   }
 
   /**
@@ -1877,7 +1883,7 @@ export class Timeline {
       });
     });
 
-    return new Timeline([...this.layers, ...wordLayers], this.globalOptions);
+    return new Timeline([...this.layers, ...wordLayers], this.globalOptions, this.codecManager);
   }
 
   /**

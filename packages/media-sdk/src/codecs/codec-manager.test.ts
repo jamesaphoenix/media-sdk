@@ -179,6 +179,7 @@ describe('Timeline Codec Integration', () => {
     
     const command = timeline.getCommand('output.mp4');
     
+    // Check that codec manager was used (should contain libx264, not default h264)
     expect(command).toContain('-c:v libx264');
     expect(command).toContain('-crf 20');
   });
