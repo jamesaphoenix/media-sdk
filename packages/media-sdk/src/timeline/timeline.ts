@@ -312,6 +312,303 @@ export class Timeline {
   }
 
   /**
+   * Add green screen video with image background replacement
+   * 
+   * This method creates a composition where the green screen areas of a video
+   * are replaced with a static image background. Perfect for meme creation,
+   * educational content, and creative video projects.
+   * 
+   * @param greenScreenVideo - Path to the video with green screen background
+   * @param backgroundImage - Path to the image to use as replacement background
+   * @param options - Chromakey and composition options
+   * @returns New Timeline instance with green screen background replacement
+   * 
+   * @example
+   * ```typescript
+   * // Basic green screen meme
+   * const meme = new Timeline()
+   *   .addGreenScreenWithImageBackground('person-reacting.mp4', 'explosion.jpg', {
+   *     chromaKey: '#00FF00',
+   *     chromaSimilarity: 0.4,
+   *     chromaBlend: 0.1
+   *   });
+   * 
+   * // Advanced configuration with scaling
+   * const timeline = new Timeline()
+   *   .addGreenScreenWithImageBackground('presenter.mp4', 'office-background.png', {
+   *     chromaKey: '#00FF00',
+   *     chromaSimilarity: 0.35,
+   *     chromaBlend: 0.15,
+   *     backgroundScale: 'fit',
+   *     quality: 'high'
+   *   });
+   * ```
+   */
+  addGreenScreenWithImageBackground(
+    greenScreenVideo: string, 
+    backgroundImage: string, 
+    options: {
+      chromaKey?: string;
+      chromaSimilarity?: number;
+      chromaBlend?: number;
+      chromaYuv?: boolean;
+      backgroundScale?: 'fit' | 'fill' | 'stretch' | 'crop';
+      startTime?: number;
+      duration?: number;
+      quality?: 'low' | 'medium' | 'high';
+    } = {}
+  ): Timeline {
+    const {
+      chromaKey = '#00FF00',
+      chromaSimilarity = 0.4,
+      chromaBlend = 0.1,
+      chromaYuv = false,
+      backgroundScale = 'fill',
+      startTime = 0,
+      duration,
+      quality = 'medium'
+    } = options;
+
+    // Create video layer for green screen content
+    const videoLayer: TimelineLayer = {
+      type: 'video',
+      source: greenScreenVideo,
+      options: {
+        startTime,
+        duration,
+        greenScreenBackground: {
+          type: 'image',
+          source: backgroundImage,
+          chromaKey,
+          chromaSimilarity,
+          chromaBlend,
+          chromaYuv,
+          backgroundScale,
+          quality
+        }
+      },
+      startTime,
+      duration
+    };
+
+    return new Timeline([...this.layers, videoLayer], this.globalOptions, this.codecManager);
+  }
+
+  /**
+   * Add green screen video with video background replacement
+   * 
+   * This method creates a composition where the green screen areas of a video
+   * are replaced with another video background. Ideal for creating dynamic
+   * memes, virtual environments, and complex video compositions.
+   * 
+   * @param greenScreenVideo - Path to the video with green screen background
+   * @param backgroundVideo - Path to the video to use as replacement background
+   * @param options - Chromakey and composition options
+   * @returns New Timeline instance with green screen background replacement
+   * 
+   * @example
+   * ```typescript
+   * // Dynamic background meme
+   * const meme = new Timeline()
+   *   .addGreenScreenWithVideoBackground('person-dancing.mp4', 'disco-lights.mp4', {
+   *     chromaKey: '#00FF00',
+   *     chromaSimilarity: 0.4,
+   *     backgroundLoop: true,
+   *     audioMix: 'greenscreen'
+   *   });
+   * 
+   * // Weather reporter with live background
+   * const weather = new Timeline()
+   *   .addGreenScreenWithVideoBackground('reporter.mp4', 'storm-footage.mp4', {
+   *     chromaKey: '#0000FF', // Blue screen
+   *     backgroundScale: 'crop',
+   *     audioMix: 'both',
+   *     syncTiming: true
+   *   });
+   * ```
+   */
+  addGreenScreenWithVideoBackground(
+    greenScreenVideo: string, 
+    backgroundVideo: string, 
+    options: {
+      chromaKey?: string;
+      chromaSimilarity?: number;
+      chromaBlend?: number;
+      chromaYuv?: boolean;
+      backgroundScale?: 'fit' | 'fill' | 'stretch' | 'crop';
+      backgroundLoop?: boolean;
+      audioMix?: 'greenscreen' | 'background' | 'both' | 'none';
+      syncTiming?: boolean;
+      startTime?: number;
+      duration?: number;
+      quality?: 'low' | 'medium' | 'high';
+    } = {}
+  ): Timeline {
+    const {
+      chromaKey = '#00FF00',
+      chromaSimilarity = 0.4,
+      chromaBlend = 0.1,
+      chromaYuv = false,
+      backgroundScale = 'fill',
+      backgroundLoop = false,
+      audioMix = 'greenscreen',
+      syncTiming = true,
+      startTime = 0,
+      duration,
+      quality = 'medium'
+    } = options;
+
+    // Create video layer for green screen content
+    const videoLayer: TimelineLayer = {
+      type: 'video',
+      source: greenScreenVideo,
+      options: {
+        startTime,
+        duration,
+        greenScreenBackground: {
+          type: 'video',
+          source: backgroundVideo,
+          chromaKey,
+          chromaSimilarity,
+          chromaBlend,
+          chromaYuv,
+          backgroundScale,
+          backgroundLoop,
+          audioMix,
+          syncTiming,
+          quality
+        }
+      },
+      startTime,
+      duration
+    };
+
+    return new Timeline([...this.layers, videoLayer], this.globalOptions, this.codecManager);
+  }
+
+  /**
+   * Add simple green screen meme with preset configurations
+   * 
+   * Convenience method for quick meme creation with popular presets
+   * and automatic parameter optimization for viral content.
+   * 
+   * @param greenScreenVideo - Path to the video with green screen
+   * @param background - Path to image or video background
+   * @param preset - Preset configuration for popular meme types
+   * @param options - Additional customization options
+   * @returns New Timeline instance with optimized meme configuration
+   * 
+   * @example
+   * ```typescript
+   * // Reaction meme with automatic optimization
+   * const meme = new Timeline()
+   *   .addGreenScreenMeme('person-shocked.mp4', 'explosion.gif', 'reaction', {
+   *     platform: 'tiktok',
+   *     intensity: 'high'
+   *   });
+   * 
+   * // Weather meme with professional look
+   * const weather = new Timeline()
+   *   .addGreenScreenMeme('pointing.mp4', 'weather-map.jpg', 'weather', {
+   *     platform: 'youtube',
+   *     professional: true
+   *   });
+   * ```
+   */
+  addGreenScreenMeme(
+    greenScreenVideo: string,
+    background: string,
+    preset: 'reaction' | 'weather' | 'gaming' | 'educational' | 'news' | 'comedy' | 'custom' = 'reaction',
+    options: {
+      platform?: 'tiktok' | 'youtube' | 'instagram' | 'twitter';
+      intensity?: 'low' | 'medium' | 'high';
+      professional?: boolean;
+      chromaKey?: string;
+      quality?: 'low' | 'medium' | 'high';
+      autoOptimize?: boolean;
+    } = {}
+  ): Timeline {
+    const {
+      platform = 'tiktok',
+      intensity = 'medium',
+      professional = false,
+      chromaKey = '#00FF00',
+      quality = 'high',
+      autoOptimize = true
+    } = options;
+
+    // Define preset configurations
+    const presets = {
+      reaction: {
+        chromaSimilarity: intensity === 'high' ? 0.5 : intensity === 'medium' ? 0.4 : 0.3,
+        chromaBlend: 0.1,
+        backgroundScale: 'fill' as const,
+        quality: 'high' as const
+      },
+      weather: {
+        chromaSimilarity: professional ? 0.3 : 0.4,
+        chromaBlend: professional ? 0.05 : 0.1,
+        backgroundScale: 'fit' as const,
+        quality: professional ? 'high' : 'medium' as const
+      },
+      gaming: {
+        chromaSimilarity: 0.45,
+        chromaBlend: 0.15,
+        backgroundScale: 'crop' as const,
+        quality: 'high' as const
+      },
+      educational: {
+        chromaSimilarity: 0.35,
+        chromaBlend: 0.08,
+        backgroundScale: 'fit' as const,
+        quality: 'high' as const
+      },
+      news: {
+        chromaSimilarity: 0.3,
+        chromaBlend: 0.05,
+        backgroundScale: 'fit' as const,
+        quality: 'high' as const
+      },
+      comedy: {
+        chromaSimilarity: 0.5,
+        chromaBlend: 0.2,
+        backgroundScale: 'fill' as const,
+        quality: 'medium' as const
+      },
+      custom: {
+        chromaSimilarity: 0.4,
+        chromaBlend: 0.1,
+        backgroundScale: 'fill' as const,
+        quality: 'medium' as const
+      }
+    };
+
+    const presetConfig = presets[preset];
+    
+    // Determine if background is image or video based on extension
+    const isVideo = /\.(mp4|mov|avi|mkv|webm|gif)$/i.test(background);
+
+    if (isVideo) {
+      return this.addGreenScreenWithVideoBackground(greenScreenVideo, background, {
+        chromaKey,
+        chromaSimilarity: presetConfig.chromaSimilarity,
+        chromaBlend: presetConfig.chromaBlend,
+        backgroundScale: presetConfig.backgroundScale,
+        quality: presetConfig.quality,
+        audioMix: preset === 'reaction' || preset === 'comedy' ? 'greenscreen' : 'both'
+      });
+    } else {
+      return this.addGreenScreenWithImageBackground(greenScreenVideo, background, {
+        chromaKey,
+        chromaSimilarity: presetConfig.chromaSimilarity,
+        chromaBlend: presetConfig.chromaBlend,
+        backgroundScale: presetConfig.backgroundScale,
+        quality: presetConfig.quality
+      });
+    }
+  }
+
+  /**
    * Trim the timeline to a specific time range
    */
   trim(start: number, end?: number): Timeline {
@@ -763,6 +1060,10 @@ export class Timeline {
       if (layer.source) {
         inputFiles.add(layer.source);
       }
+      // Add green screen background sources
+      if (layer.type === 'video' && layer.options?.greenScreenBackground) {
+        inputFiles.add(layer.options.greenScreenBackground.source);
+      }
     });
 
     inputs.push(...Array.from(inputFiles));
@@ -808,6 +1109,14 @@ export class Timeline {
         inputMap.set(layer.source, inputIndex++);
         inputFiles.add(layer.source);
       }
+      // Add green screen background sources
+      if (layer.type === 'video' && layer.options?.greenScreenBackground) {
+        const bgSource = layer.options.greenScreenBackground.source;
+        if (!inputMap.has(bgSource)) {
+          inputMap.set(bgSource, inputIndex++);
+          inputFiles.add(bgSource);
+        }
+      }
     });
 
     // Process video layers first
@@ -821,6 +1130,79 @@ export class Timeline {
     
     // Determine initial stream - could be video or first image
     let currentVideoStream = '0:v'; // Remove brackets here, they'll be added when needed
+    
+    // Handle green screen background replacement first
+    if (videoLayers.length > 0 && videoLayers[0].options?.greenScreenBackground) {
+      const greenScreenLayer = videoLayers[0];
+      const bgConfig = greenScreenLayer.options.greenScreenBackground;
+      
+      if (bgConfig.type === 'image') {
+        // Green screen with image background
+        const bgImageIndex = inputMap.get(bgConfig.source);
+        if (bgImageIndex !== undefined) {
+          const chromaFilter = bgConfig.chromaYuv
+            ? `chromakey=color=0x${bgConfig.chromaKey.replace('#', '')}:similarity=${bgConfig.chromaSimilarity}:blend=${bgConfig.chromaBlend}:yuv=true`
+            : `chromakey=color=0x${bgConfig.chromaKey.replace('#', '')}:similarity=${bgConfig.chromaSimilarity}:blend=${bgConfig.chromaBlend}`;
+          
+          // Scale background image to match video dimensions
+          let scaleMode = 'scale=iw:ih';
+          switch (bgConfig.backgroundScale) {
+            case 'fit':
+              scaleMode = 'scale=iw:ih:force_original_aspect_ratio=decrease,pad=iw:ih:(ow-iw)/2:(oh-ih)/2';
+              break;
+            case 'fill':
+              scaleMode = 'scale=iw:ih:force_original_aspect_ratio=increase,crop=iw:ih';
+              break;
+            case 'stretch':
+              scaleMode = 'scale=iw:ih';
+              break;
+            case 'crop':
+              scaleMode = 'scale=iw:ih:force_original_aspect_ratio=increase,crop=iw:ih';
+              break;
+          }
+          
+          const backgroundFilter = `[${bgImageIndex}:v]${scaleMode}[bg];[0:v]${chromaFilter}[keyed];[bg][keyed]overlay=0:0[greenscreen]`;
+          filterChains.push(backgroundFilter);
+          currentVideoStream = 'greenscreen';
+        }
+      } else if (bgConfig.type === 'video') {
+        // Green screen with video background
+        const bgVideoIndex = inputMap.get(bgConfig.source);
+        if (bgVideoIndex !== undefined) {
+          const chromaFilter = bgConfig.chromaYuv
+            ? `chromakey=color=0x${bgConfig.chromaKey.replace('#', '')}:similarity=${bgConfig.chromaSimilarity}:blend=${bgConfig.chromaBlend}:yuv=true`
+            : `chromakey=color=0x${bgConfig.chromaKey.replace('#', '')}:similarity=${bgConfig.chromaSimilarity}:blend=${bgConfig.chromaBlend}`;
+          
+          // Scale background video to match green screen video dimensions
+          let scaleMode = 'scale=iw:ih';
+          switch (bgConfig.backgroundScale) {
+            case 'fit':
+              scaleMode = 'scale=iw:ih:force_original_aspect_ratio=decrease,pad=iw:ih:(ow-iw)/2:(oh-ih)/2';
+              break;
+            case 'fill':
+              scaleMode = 'scale=iw:ih:force_original_aspect_ratio=increase,crop=iw:ih';
+              break;
+            case 'stretch':
+              scaleMode = 'scale=iw:ih';
+              break;
+            case 'crop':
+              scaleMode = 'scale=iw:ih:force_original_aspect_ratio=increase,crop=iw:ih';
+              break;
+          }
+          
+          // Handle looping if needed
+          let backgroundVideoFilter = `[${bgVideoIndex}:v]${scaleMode}`;
+          if (bgConfig.backgroundLoop) {
+            backgroundVideoFilter += ',loop=loop=-1:size=32767';
+          }
+          backgroundVideoFilter += '[bg]';
+          
+          const greenScreenFilter = `${backgroundVideoFilter};[0:v]${chromaFilter}[keyed];[bg][keyed]overlay=0:0[greenscreen]`;
+          filterChains.push(greenScreenFilter);
+          currentVideoStream = 'greenscreen';
+        }
+      }
+    }
     
     // If no video layers but we have image layers, handle zoompan specially
     if (needsImageAsBase) {

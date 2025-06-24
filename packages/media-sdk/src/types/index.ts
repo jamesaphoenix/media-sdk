@@ -26,6 +26,19 @@ export interface VideoOptions {
   startTime?: number;
   trimStart?: number;
   trimEnd?: number;
+  greenScreenBackground?: {
+    type: 'image' | 'video';
+    source: string;
+    chromaKey: string;
+    chromaSimilarity: number;
+    chromaBlend: number;
+    chromaYuv?: boolean;
+    backgroundScale: 'fit' | 'fill' | 'stretch' | 'crop';
+    backgroundLoop?: boolean;
+    audioMix?: 'greenscreen' | 'background' | 'both' | 'none';
+    syncTiming?: boolean;
+    quality: 'low' | 'medium' | 'high';
+  };
 }
 
 export interface TextStyle {
