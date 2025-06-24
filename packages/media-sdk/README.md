@@ -2,7 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/%40jamesaphoenix%2Fmedia-sdk.svg)](https://badge.fury.io/js/%40jamesaphoenix%2Fmedia-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js CI](https://github.com/jamesaphoenix/media-sdk/workflows/Node.js%20CI/badge.svg)](https://github.com/jamesaphoenix/media-sdk/actions)
+[![Media SDK CI](https://github.com/jamesaphoenix/media-sdk/workflows/Media%20SDK%20CI/badge.svg)](https://github.com/jamesaphoenix/media-sdk/actions)
 
 > **Declarative, AI-friendly API for video manipulation using FFmpeg**
 
@@ -261,10 +261,29 @@ The Media SDK implements a revolutionary **Self-Healing Pattern**:
 📦 All Primitives    🎬 Real FFmpeg     👁️ Vision      🔧 Auto-Fix   📊 Expand Coverage
 ```
 
-### Vision-Powered Quality Validation
+### Vision-Powered Quality Validation (Optional)
+
+Self-healing and quality validation are **completely optional** features. You can use the SDK without any AI integration:
 
 ```typescript
+// Basic usage - no self-healing
+const timeline = new Timeline()
+  .addVideo('input.mp4')
+  .addText('Hello World');
+
+const command = timeline.getCommand('output.mp4');
+```
+
+To enable self-healing and quality validation:
+
+```typescript
+// With self-healing enabled (requires GEMINI_API_KEY)
 import { validateRender } from '@jamesaphoenix/media-sdk/validation';
+
+// Validate API key
+if (!process.env.GEMINI_API_KEY) {
+  console.warn('GEMINI_API_KEY not set - self-healing features disabled');
+}
 
 const validation = await validateRender(
   'output.mp4',
@@ -277,6 +296,8 @@ const validation = await validateRender(
 console.log('Quality Score:', validation.qualityScore);
 console.log('Suggestions:', validation.suggestions);
 ```
+
+**Note**: Self-healing features require a Gemini API key but are entirely optional. The core SDK functionality works without any API keys.
 
 ### AST-Based Dependency Tracking
 

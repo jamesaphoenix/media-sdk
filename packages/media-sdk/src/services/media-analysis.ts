@@ -254,6 +254,15 @@ export class MediaAnalysisService {
   };
   
   constructor(apiKey: string, defaultModel: string = 'gemini-2.5-flash') {
+    // Validate API key
+    if (!apiKey || apiKey.trim() === '') {
+      throw new Error('Invalid GEMINI_API_KEY: API key is required for media analysis features');
+    }
+    
+    if (apiKey === 'test-api-key' || apiKey.startsWith('test-')) {
+      console.warn('Warning: Using test API key - media analysis features may not work properly');
+    }
+    
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.fileManager = new GoogleAIFileManager(apiKey);
     this.defaultModel = defaultModel;
@@ -915,9 +924,15 @@ export function createMediaAnalysisService(
   apiKey?: string,
   model?: string
 ): MediaAnalysisService {
-  const key = apiKey || process.env.GEMINI_API_KEY;
-  if (!key) {
-    throw new Error('Gemini API key required');
+  const key = apiKey || process.env.GEMINI_API_KEY || '';
+  
+  if (!key || key.trim() === '') {
+    throw new Error('Gemini API key required. Set GEMINI_API_KEY environment variable or pass apiKey parameter.');
+  }
+  
+  // Validate key format (basic check)
+  if (key.length < 20) {
+    throw new Error('Invalid Gemini API key format. Key appears to be too short.');
   }
   
   return new MediaAnalysisService(key, model);
