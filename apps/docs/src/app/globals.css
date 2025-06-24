@@ -1,0 +1,61 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Custom styles for documentation */
+.prose {
+  @apply max-w-none;
+}
+
+.prose h1 {
+  @apply text-3xl font-bold text-gray-900 mb-4;
+}
+
+.prose h2 {
+  @apply text-2xl font-semibold text-gray-900 mt-8 mb-4;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold text-gray-900 mt-6 mb-3;
+}
+
+.prose p {
+  @apply text-gray-600 leading-relaxed mb-4;
+}
+
+.prose ul {
+  @apply list-disc list-inside space-y-2 mb-4;
+}
+
+.prose li {
+  @apply text-gray-600;
+}
+
+.prose code {
+  @apply bg-gray-100 px-1 py-0.5 rounded text-sm font-mono;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-blue-200 pl-4 italic text-gray-600;
+}
+
+/* Callout styles */
+.callout {
+  @apply border rounded-lg p-4 mb-4;
+}
+
+.callout.info {
+  @apply border-blue-200 bg-blue-50 text-blue-900;
+}
+
+.callout.warning {
+  @apply border-yellow-200 bg-yellow-50 text-yellow-900;
+}
+
+.callout.error {
+  @apply border-red-200 bg-red-50 text-red-900;
+}
+
+.callout.tip {
+  @apply border-green-200 bg-green-50 text-green-900;
+}
