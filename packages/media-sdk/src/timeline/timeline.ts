@@ -1532,14 +1532,14 @@ export class Timeline {
       style.fontSize ? `fontsize=${style.fontSize}` : 'fontsize=24',
       style.fontFamily ? `fontfile='${style.fontFamily}'` : '',
       style.color ? `fontcolor=${style.color}` : 'fontcolor=white',
-      // Background box
-      style.backgroundColor || style.background?.color ? 
+      // Background box (only if no stroke is specified)
+      (style.backgroundColor || style.background?.color) && !style.strokeColor ? 
         `box=1:boxcolor=${style.backgroundColor || style.background?.color}` : '',
-      style.background?.padding ? `boxborderw=${style.background.padding}` : 
-        (style.backgroundColor ? 'boxborderw=5' : ''),
-      // Stroke/border
-      style.strokeColor ? `bordercolor=${style.strokeColor}` : '',
+      (style.background?.padding && !style.strokeColor) ? `boxborderw=${style.background.padding}` : 
+        ((style.backgroundColor && !style.strokeColor) ? 'boxborderw=5' : ''),
+      // Stroke/border (takes priority over box styling)
       style.strokeWidth ? `borderw=${style.strokeWidth}` : '',
+      style.strokeColor ? `bordercolor=${style.strokeColor}` : '',
       // Shadow
       style.shadowColor ? `shadowcolor=${style.shadowColor}` : '',
       style.shadowOffsetX ? `shadowx=${style.shadowOffsetX}` : '',

@@ -410,7 +410,145 @@ export {
   runAllExamples
 };
 
+// Example 8: Green Screen Meme Creation
+function createGreenScreenMemes() {
+  console.log('🎭 Creating Green Screen Memes...');
+  
+  // Example 1: Reaction meme with image background
+  const reactionMeme = new Timeline()
+    .addGreenScreenWithImageBackground(
+      'assets/green-screen-person.mp4',
+      'assets/explosion-background.jpg',
+      {
+        chromaKey: '#00FF00',
+        chromaSimilarity: 0.4,
+        chromaBlend: 0.1,
+        backgroundScale: 'fill'
+      }
+    )
+    .addText('When you see the code review comments', {
+      position: 'top',
+      style: {
+        fontSize: 48,
+        color: '#ffffff',
+        strokeColor: '#000000',
+        strokeWidth: 3
+      }
+    })
+    .setAspectRatio('9:16');
+
+  console.log('🔥 Reaction Meme Command:');
+  console.log(reactionMeme.getCommand('output/reaction-meme.mp4'));
+
+  // Example 2: Gaming meme with video background
+  const gamingMeme = new Timeline()
+    .addGreenScreenWithVideoBackground(
+      'assets/streamer-reaction.mp4',
+      'assets/game-explosion.mp4',
+      {
+        chromaKey: '#00FF00',
+        chromaSimilarity: 0.45,
+        chromaBlend: 0.15,
+        backgroundScale: 'crop',
+        audioMix: 'greenscreen',
+        backgroundLoop: true
+      }
+    )
+    .addText('EPIC FAIL!', {
+      position: 'center',
+      style: {
+        fontSize: 64,
+        color: '#ff0000',
+        strokeColor: '#ffffff',
+        strokeWidth: 4
+      }
+    })
+    .setAspectRatio('16:9');
+
+  console.log('🎮 Gaming Meme Command:');
+  console.log(gamingMeme.getCommand('output/gaming-meme.mp4'));
+
+  // Example 3: Weather reporter preset
+  const weatherMeme = new Timeline()
+    .addGreenScreenMeme(
+      'assets/pointing-person.mp4',
+      'assets/weather-map.jpg',
+      'weather',
+      {
+        platform: 'youtube',
+        professional: true
+      }
+    )
+    .addText('Me explaining why the servers are down', {
+      position: 'bottom',
+      style: {
+        fontSize: 32,
+        color: '#ffffff',
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        padding: 15
+      }
+    })
+    .setAspectRatio('16:9');
+
+  console.log('🌤️ Weather Reporter Meme Command:');
+  console.log(weatherMeme.getCommand('output/weather-meme.mp4'));
+
+  // Example 4: Comedy meme with solid color
+  const comedyMeme = new Timeline()
+    .addGreenScreenMeme(
+      'assets/shocked-face.mp4',
+      'assets/red-background.jpg',
+      'comedy',
+      {
+        platform: 'tiktok',
+        intensity: 'high'
+      }
+    )
+    .addText('POV: You deployed on Friday', {
+      position: 'top',
+      style: {
+        fontSize: 44,
+        color: '#ffffff',
+        strokeColor: '#000000',
+        strokeWidth: 3
+      }
+    })
+    .addText('🔥 RIP WEEKEND 🔥', {
+      position: 'bottom',
+      style: {
+        fontSize: 36,
+        color: '#ff0000',
+        strokeColor: '#ffffff',
+        strokeWidth: 2
+      }
+    })
+    .setAspectRatio('9:16');
+
+  console.log('😂 Comedy Meme Command:');
+  console.log(comedyMeme.getCommand('output/comedy-meme.mp4'));
+
+  console.log('\n🎯 Available Green Screen Presets:');
+  console.log('- reaction: High engagement for reaction videos');
+  console.log('- weather: Professional weather reporter style');
+  console.log('- gaming: Gaming content with dynamic effects');
+  console.log('- educational: Clean professional educational content');
+  console.log('- news: Professional news broadcast style');
+  console.log('- comedy: High contrast for viral comedy content');
+
+  console.log('\n✨ Key Features:');
+  console.log('✅ Replace green screen with image or video backgrounds');
+  console.log('✅ Automatic platform optimization (TikTok, YouTube, Instagram)');
+  console.log('✅ Professional presets for different content types');
+  console.log('✅ Advanced chromakey controls (similarity, blend, YUV)');
+  console.log('✅ Multiple background scaling modes (fit, fill, stretch, crop)');
+  console.log('✅ Audio mixing options for video backgrounds');
+  console.log('✅ Background video looping support');
+  console.log('✅ Integration with text overlays and effects');
+}
+
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   runAllExamples();
+  console.log('\n' + '='.repeat(50) + '\n');
+  createGreenScreenMemes();
 }
