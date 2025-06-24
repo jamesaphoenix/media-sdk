@@ -449,6 +449,52 @@ VISION_DEEP_ANALYSIS=true
 7. Automated A/B testing for video variants
 8. Cross-platform compatibility testing
 
+## 🔧 Self-Healing Configuration
+
+### Runtime Self-Healing (Optional)
+
+Self-healing for runtime media generation should be **optional** to give developers control:
+
+```typescript
+// Enable/disable self-healing at runtime
+const timeline = new Timeline({
+  enableSelfHealing: true,  // Default: false
+  selfHealingOptions: {
+    qualityThreshold: 0.7,
+    maxIterations: 3,
+    autoFix: true
+  }
+});
+
+// Or via environment variable
+MEDIA_SDK_SELF_HEALING=true
+```
+
+### SDK Self-Healing (Development)
+
+The SDK itself uses self-healing to fix code issues automatically:
+
+1. **Test Failure Detection**: When tests fail, analyze the error patterns
+2. **Code Fix Generation**: Use AI to generate fixes for common issues
+3. **Automatic PR Creation**: Create pull requests with fixes
+4. **Validation Loop**: Run tests again to verify fixes work
+
+Example SDK self-healing flow:
+```typescript
+// SDK detects missing method in Timeline
+Error: timeline.setResolution is not a function
+
+// Self-healing generates fix:
+class Timeline {
+  setResolution(width: number, height: number): Timeline {
+    return this.scale(width, height);
+  }
+}
+
+// Validates fix with tests
+✅ All tests passing
+```
+
 ## 🚀 Next-Generation SDK Architecture Thoughts
 
 ### 1. **Custom Runtime Execution for Scale Testing**

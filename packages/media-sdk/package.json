@@ -59,6 +59,7 @@
   "dependencies": {
     "@effect/platform": "^0.85.2",
     "@effect/platform-bun": "^0.70.5",
+    "@google/generative-ai": "^0.21.0",
     "effect": "^3.16.8",
     "events": "^3.3.0"
   },
