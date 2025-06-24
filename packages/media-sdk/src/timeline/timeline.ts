@@ -13,6 +13,7 @@ import type {
   ExecutionResult
 } from '../types/index.js';
 import { CaptionDurationCalculator, imageCaptionPresets } from '../captions/image-captions.js';
+import { CodecManager, type CodecConfiguration, CodecPresets } from '../codecs/codec-manager.js';
 
 /**
  * @fileoverview Core Timeline API for declarative video composition
@@ -82,6 +83,9 @@ export class Timeline {
   
   /** @private Current audio stream identifier for FFmpeg filter chain */
   private lastAudioStream?: string;
+  
+  /** @private Codec configuration manager */
+  private codecManager?: CodecManager;
 
   /**
    * Creates a new Timeline instance
@@ -102,9 +106,10 @@ export class Timeline {
     return new Timeline();
   }
 
-    constructor(layers: TimelineLayer[] = [], options: Record<string, any> = {}) {
+    constructor(layers: TimelineLayer[] = [], options: Record<string, any> = {}, codecManager?: CodecManager) {
     this.layers = [...layers];
     this.globalOptions = { ...options };
+    this.codecManager = codecManager;
   }
 
   /**
@@ -148,7 +153,7 @@ export class Timeline {
       duration: options.duration
     };
 
-    return new Timeline([...this.layers, layer], this.globalOptions);
+    return new Timeline([...this.layers, layer], this.globalOptions, this.codecManager);
   }
 
   /**
@@ -195,7 +200,7 @@ export class Timeline {
       duration: options.duration
     };
 
-    return new Timeline([...this.layers, layer], this.globalOptions);
+    return new Timeline([...this.layers, layer], this.globalOptions, this.codecManager);
   }
 
   /**
@@ -253,7 +258,7 @@ export class Timeline {
       duration: options.duration || 5
     };
 
-    return new Timeline([...this.layers, layer], this.globalOptions);
+    return new Timeline([...this.layers, layer], this.globalOptions, this.codecManager);
   }
 
   /**
@@ -268,7 +273,7 @@ export class Timeline {
       duration: options.duration === 'full' ? undefined : (options.duration || 5)
     };
 
-    return new Timeline([...this.layers, layer], this.globalOptions);
+    return new Timeline([...this.layers, layer], this.globalOptions, this.codecManager);
   }
 
   /**
@@ -375,7 +380,234 @@ export class Timeline {
       duration
     };
 
-    return new Timeline(this.layers, newOptions);
+    return new Timeline(this.layers, newOptions, this.codecManager);
+  }
+
+  /**
+   * Configure video codec settings
+   * 
+   * @param codec - Video codec name (e.g., 'libx264', 'libx265', 'h264_nvenc')
+   * @param options - Video codec options including quality, performance settings
+   * @returns New Timeline instance with video codec configured
+   * 
+   * @example
+   * ```typescript
+   * // High quality H.264 encoding
+   * timeline.setVideoCodec('libx264', {
+   *   preset: 'slow',
+   *   crf: 18,
+   *   profile: 'high',
+   *   level: '5.1'
+   * });
+   * 
+   * // Hardware accelerated encoding
+   * timeline.setVideoCodec('h264_nvenc', {
+   *   preset: 'p4',
+   *   crf: 23,
+   *   profile: 'high'
+   * });
+   * ```
+   */
+  setVideoCodec(codec: string, options?: any): Timeline {
+    const manager = this.codecManager || new CodecManager();
+    manager.setVideoCodec(codec, options);
+    return new Timeline(this.layers, this.globalOptions, manager);
+  }
+
+  /**
+   * Configure audio codec settings
+   * 
+   * @param codec - Audio codec name (e.g., 'aac', 'libopus', 'flac')
+   * @param options - Audio codec options including bitrate, quality settings
+   * @returns New Timeline instance with audio codec configured
+   * 
+   * @example
+   * ```typescript
+   * // High quality AAC encoding
+   * timeline.setAudioCodec('aac', {
+   *   bitrate: '192k',
+   *   sampleRate: 48000,
+   *   channels: 2,
+   *   profile: 'aac_low'
+   * });
+   * 
+   * // Lossless FLAC encoding
+   * timeline.setAudioCodec('flac', {
+   *   compressionLevel: 8
+   * });
+   * ```
+   */
+  setAudioCodec(codec: string, options?: any): Timeline {
+    const manager = this.codecManager || new CodecManager();
+    manager.setAudioCodec(codec, options);
+    return new Timeline(this.layers, this.globalOptions, manager);
+  }
+
+  /**
+   * Apply a codec preset for common use cases
+   * 
+   * @param preset - Predefined codec preset name
+   * @returns New Timeline instance with codec preset applied
+   * 
+   * @example
+   * ```typescript
+   * // Archival quality (high quality, larger files)
+   * timeline.useCodecPreset('archival');
+   * 
+   * // Streaming optimized (fast encode, good quality)
+   * timeline.useCodecPreset('streaming');
+   * 
+   * // Mobile optimized (smaller files, compatible)
+   * timeline.useCodecPreset('mobile');
+   * 
+   * // Platform-specific presets
+   * timeline.useCodecPreset('youtube');
+   * timeline.useCodecPreset('tiktok');
+   * timeline.useCodecPreset('instagram');
+   * ```
+   */
+  useCodecPreset(preset: keyof typeof CodecPresets): Timeline {
+    const manager = this.codecManager || new CodecManager();
+    manager.usePreset(preset);
+    return new Timeline(this.layers, this.globalOptions, manager);
+  }
+
+  /**
+   * Enable hardware acceleration for encoding
+   * 
+   * @param type - Hardware acceleration type
+   * @returns New Timeline instance with hardware acceleration configured
+   * 
+   * @example
+   * ```typescript
+   * // Auto-detect available hardware acceleration
+   * timeline.setHardwareAcceleration('auto');
+   * 
+   * // Use NVIDIA GPU acceleration
+   * timeline.setHardwareAcceleration('nvidia');
+   * 
+   * // Use Intel Quick Sync Video
+   * timeline.setHardwareAcceleration('intel');
+   * 
+   * // Use AMD hardware acceleration
+   * timeline.setHardwareAcceleration('amd');
+   * 
+   * // Use Apple VideoToolbox (macOS)
+   * timeline.setHardwareAcceleration('apple');
+   * ```
+   */
+  setHardwareAcceleration(type: 'auto' | 'nvidia' | 'intel' | 'amd' | 'apple' | 'none'): Timeline {
+    const manager = this.codecManager || new CodecManager();
+    manager.setHardwareAcceleration(type);
+    return new Timeline(this.layers, this.globalOptions, manager);
+  }
+
+  /**
+   * Configure encoding for target file size
+   * 
+   * @param targetSizeMB - Target file size in megabytes
+   * @param hasAudio - Whether the output includes audio
+   * @returns New Timeline instance with optimized codec settings
+   * 
+   * @example
+   * ```typescript
+   * // Optimize for 50MB file size with audio
+   * timeline.optimizeForFileSize(50, true);
+   * 
+   * // Video-only output optimized for 25MB
+   * timeline.optimizeForFileSize(25, false);
+   * ```
+   */
+  optimizeForFileSize(targetSizeMB: number, hasAudio: boolean = true): Timeline {
+    const duration = this.getDuration();
+    const settings = CodecManager.getSettingsForFileSize(duration, targetSizeMB, hasAudio);
+    
+    const manager = this.codecManager || new CodecManager();
+    manager.setVideoCodec('libx264', {
+      crf: settings.crf,
+      preset: 'medium'
+    });
+    
+    if (hasAudio) {
+      manager.setAudioCodec('aac', {
+        bitrate: settings.audioBitrate
+      });
+    }
+    
+    return new Timeline(this.layers, this.globalOptions, manager);
+  }
+
+  /**
+   * Auto-select optimal codec configuration
+   * 
+   * @param requirements - Encoding requirements and constraints
+   * @returns New Timeline instance with auto-selected codec configuration
+   * 
+   * @example
+   * ```typescript
+   * // Maximum compatibility, medium quality
+   * timeline.autoSelectCodec({
+   *   container: 'mp4',
+   *   quality: 'medium',
+   *   compatibility: 'maximum'
+   * });
+   * 
+   * // Modern browsers, high quality, small file size
+   * timeline.autoSelectCodec({
+   *   container: 'webm',
+   *   quality: 'high',
+   *   compatibility: 'modern',
+   *   fileSize: 'smallest',
+   *   hardware: true
+   * });
+   * ```
+   */
+  autoSelectCodec(requirements: {
+    container: string;
+    quality: 'low' | 'medium' | 'high' | 'highest';
+    compatibility: 'maximum' | 'modern' | 'cutting-edge';
+    fileSize?: 'smallest' | 'balanced' | 'quality';
+    hardware?: boolean;
+  }): Timeline {
+    const codecConfig = CodecManager.autoSelectCodec(requirements);
+    const manager = this.codecManager || new CodecManager();
+    
+    if (codecConfig.video) {
+      manager.setVideoCodec(codecConfig.video.codec, codecConfig.video.options);
+    }
+    if (codecConfig.audio) {
+      manager.setAudioCodec(codecConfig.audio.codec, codecConfig.audio.options);
+    }
+    
+    return new Timeline(this.layers, this.globalOptions, manager);
+  }
+
+  /**
+   * Check codec compatibility with target container and platform
+   * 
+   * @param container - Target container format (e.g., 'mp4', 'webm', 'mkv')
+   * @param platform - Optional target platform (e.g., 'ios', 'android', 'windows')
+   * @returns Compatibility check results with warnings and alternatives
+   * 
+   * @example
+   * ```typescript
+   * const compatibility = timeline.checkCodecCompatibility('mp4', 'ios');
+   * 
+   * if (!compatibility.compatible) {
+   *   console.warn('Codec compatibility issues:', compatibility.warnings);
+   *   console.log('Suggested alternatives:', compatibility.alternatives);
+   * }
+   * ```
+   */
+  checkCodecCompatibility(container: string, platform?: string): {
+    compatible: boolean;
+    warnings: string[];
+    alternatives: string[];
+  } {
+    if (!this.codecManager) {
+      return { compatible: true, warnings: [], alternatives: [] };
+    }
+    return this.codecManager.checkCompatibility(container, platform);
   }
 
   /**
@@ -1080,30 +1312,48 @@ export class Timeline {
    * Add encoding options to FFmpeg command
    */
   private addEncodingOptions(options: string[], renderOptions: RenderOptions): void {
-    // Video codec
-    const codec = renderOptions.codec || 'h264';
-    options.push('-c:v', codec);
+    // Use codec manager if available, otherwise fall back to defaults
+    if (this.codecManager) {
+      const codecArgs = this.codecManager.getFFmpegArgs();
+      options.push(...codecArgs);
+    } else {
+      // Default codec settings (legacy behavior)
+      const codec = renderOptions.codec || 'h264';
+      options.push('-c:v', codec);
 
-    // Quality presets
-    const quality = renderOptions.quality || 'medium';
-    const preset = renderOptions.preset || 'medium';
-    
-    switch (quality) {
-      case 'low':
-        options.push('-crf', '28', '-preset', 'fast');
-        break;
-      case 'medium':
-        options.push('-crf', '23', '-preset', preset);
-        break;
-      case 'high':
-        options.push('-crf', '18', '-preset', preset);
-        break;
-      case 'ultra':
-        options.push('-crf', '15', '-preset', 'slow');
-        break;
+      // Quality presets
+      const quality = renderOptions.quality || 'medium';
+      const preset = renderOptions.preset || 'medium';
+      
+      switch (quality) {
+        case 'low':
+          options.push('-crf', '28', '-preset', 'fast');
+          break;
+        case 'medium':
+          options.push('-crf', '23', '-preset', preset);
+          break;
+        case 'high':
+          options.push('-crf', '18', '-preset', preset);
+          break;
+        case 'ultra':
+          options.push('-crf', '15', '-preset', 'slow');
+          break;
+      }
+
+      // Hardware acceleration
+      if (renderOptions.hardwareAcceleration && renderOptions.hardwareAcceleration !== 'none') {
+        if (renderOptions.hardwareAcceleration === 'auto') {
+          options.push('-hwaccel', 'auto');
+        } else {
+          options.push('-hwaccel', renderOptions.hardwareAcceleration);
+        }
+      }
+
+      // Audio codec
+      options.push('-c:a', 'aac');
     }
 
-    // Bitrate
+    // Bitrate (can override codec manager settings)
     if (renderOptions.bitrate) {
       options.push('-b:v', renderOptions.bitrate);
     }
@@ -1111,19 +1361,6 @@ export class Timeline {
     if (renderOptions.audioBitrate) {
       options.push('-b:a', renderOptions.audioBitrate);
     }
-
-    // Hardware acceleration
-    if (renderOptions.hardwareAcceleration && renderOptions.hardwareAcceleration !== 'none') {
-      if (renderOptions.hardwareAcceleration === 'auto') {
-        // Try to detect available hardware acceleration
-        options.push('-hwaccel', 'auto');
-      } else {
-        options.push('-hwaccel', renderOptions.hardwareAcceleration);
-      }
-    }
-
-    // Audio codec
-    options.push('-c:a', 'aac');
     
     // Overwrite output
     options.push('-y');
