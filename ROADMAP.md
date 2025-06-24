@@ -1,22 +1,35 @@
 # Media SDK Roadmap
 
 ## Vision
+
 Create the world's first truly self-healing, AI-native media SDK that continuously improves through autonomous learning and validation.
 
-## 🎭 Immediate Priority: Green Screen Meme Factory
-- [ ] **Green Screen Meme Generation System**
-  - AI-powered background replacement for viral content
-  - Automatic chromakey detection and refinement
-  - Trending background library integration
-  - Meme template engine with viral positioning
-  - Real-time preview with background suggestions
-  - Platform-optimized meme formats (TikTok, Instagram, YouTube Shorts)
-  - Automated text overlay positioning for maximum impact
-  - Sound effect integration for enhanced virality
+## 🚨 High Priority Infrastructure Issues
+
+### **CRITICAL: Vercel Deployment Failure**
+- [ ] **Fix Next.js Detection in Vercel**
+  - Error: "No Next.js version detected. Make sure your package.json has "next" in either "dependencies" or "devDependencies""
+  - Issue: Vercel build failing despite correct Next.js configuration in apps/docs
+  - Root cause: Monorepo structure not properly configured for Vercel
+  - **Impact**: Documentation site is down, affecting user onboarding
+  - **Solution**: Update vercel.json with proper pnpm workspace configuration ⚡ **IN PROGRESS**
+
+## 🎭 Immediate Priority: Green Screen Meme Factory ✅
+
+- [x] **Green Screen Meme Generation System** ✅ **COMPLETED**
+  - ✅ AI-powered background replacement for viral content (image & video backgrounds)
+  - ✅ Automatic chromakey detection and refinement (6 presets: reaction, weather, gaming, educational, news, comedy)
+  - ✅ Platform-optimized meme formats (TikTok, Instagram, YouTube Shorts)
+  - ✅ Automated text overlay positioning for maximum impact
+  - ✅ Comprehensive testing with 24+ green screen tests
+  - ✅ Real video rendering with self-healing system integration
+  - [ ] Make it so that captions are compared with video understanding for self-healing caption errors. This could be because the captions are overlapping core elements of the video.
+  - [ ] Sound effect integration for enhanced virality
 
 ## Current Status ✅
 
 ### Completed Features
+
 - ✅ Timeline API with immutable composition
 - ✅ Platform presets (TikTok, YouTube, Instagram)
 - ✅ Advanced word-by-word captions with highlighting
@@ -38,17 +51,20 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 ## Phase 1: Core FFmpeg Feature Parity (Q1 2025)
 
 ### 1.1 Advanced Video Manipulation
+
 - [x] **Pan & Zoom Effects** ✅
+
   - Ken Burns effect implementation
   - Smooth pan/zoom transitions
   - AI-suggested focal points
+
   ```typescript
   timeline.addPanZoom({
     startRect: { x: 0, y: 0, w: 1920, h: 1080 },
     endRect: { x: 500, y: 300, w: 960, h: 540 },
     duration: 5,
-    easing: 'ease-in-out'
-  })
+    easing: "ease-in-out",
+  });
   ```
 
 - [ ] **Advanced Scaling & Cropping**
@@ -57,15 +73,17 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
   - Auto-reframe for different aspect ratios
 
 ### 1.2 Comprehensive Codec Support ✅
+
 - [x] **Video Codec Configuration** ✅
+
   ```typescript
   timeline
-    .setVideoCodec('h265', {
-      preset: 'medium',
+    .setVideoCodec("h265", {
+      preset: "medium",
       crf: 23,
-      profile: 'main10'
+      profile: "main10",
     })
-    .setHardwareAcceleration('auto')
+    .setHardwareAcceleration("auto");
   ```
 
 - [x] **Audio Codec Management** ✅
@@ -74,60 +92,32 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
   - Codec compatibility matrix ✅
 
 ### 1.3 Bitrate & Quality Control
+
 - [ ] **Intelligent Bitrate Management**
+
   ```typescript
   timeline
     .setAdaptiveBitrate({
-      min: '500k',
-      max: '4000k',
-      target: 'quality' // or 'filesize'
+      min: "500k",
+      max: "4000k",
+      target: "quality", // or 'filesize'
     })
-    .addQualityProfile('streaming', {
-      video: { bitrate: '2500k', bufsize: '5000k' },
-      audio: { bitrate: '128k', sampleRate: 44100 }
-    })
+    .addQualityProfile("streaming", {
+      video: { bitrate: "2500k", bufsize: "5000k" },
+      audio: { bitrate: "128k", sampleRate: 44100 },
+    });
   ```
 
 - [ ] **Two-Pass Encoding**
 - [ ] **Constant Quality Mode (CRF)**
 - [ ] **Variable Bitrate Audio**
 
-### 1.4 Audio Processing Suite
-- [ ] **Advanced Audio Filters**
-  ```typescript
-  timeline
-    .normalizeAudio({ target: -14, range: 7 }) // LUFS
-    .addAudioEffect('compressor', { ratio: 4, threshold: -20 })
-    .addAudioEffect('equalizer', { 
-      bass: +3, 
-      mid: 0, 
-      treble: +2 
-    })
-    .removeBackground({ sensitivity: 0.8 })
-  ```
-
-- [ ] **Audio Ducking & Mixing**
-- [ ] **Voice Enhancement**
-- [ ] **Music Beat Detection**
-
-### 1.5 Streaming & Real-time Processing
-- [ ] **Live Streaming Support**
-  ```typescript
-  timeline
-    .setStreamingMode('live')
-    .addRTMPOutput('rtmp://live.twitch.tv/app/{stream_key}')
-    .setBufferSize('2s')
-    .enableAdaptiveBitrate()
-  ```
-
-- [ ] **HLS/DASH Output**
-- [ ] **WebRTC Integration**
-- [ ] **Progressive Download**
-
 ## Phase 2: AI-Native Features (Q2 2025)
 
 ### 2.1 Self-Correcting Error System
+
 - [ ] **Intelligent Error Recovery**
+
   ```typescript
   class MediaSDKError extends SelfHealingError {
     constructor(error: FFmpegError) {
@@ -146,10 +136,12 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 - [ ] **Learning from Failures**
 
 ### 2.2 Runtime Execution Framework
+
 - [ ] **Systematic Scale Testing**
+
   ```typescript
   const runtime = new MediaRuntime();
-  
+
   runtime
     .generateScenarios(1000)
     .executeInParallel(10)
@@ -163,23 +155,25 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 - [ ] **Performance Benchmarking**
 
 ### 2.3 Multi-Modal Validation
+
 - [ ] **Audio Analysis Integration**
+
   ```typescript
   const validation = await timeline.validate({
-    visual: { 
-      checkText: true, 
+    visual: {
+      checkText: true,
       checkFaces: true,
-      checkQuality: true 
+      checkQuality: true,
     },
-    audio: { 
+    audio: {
       checkLevels: true,
       checkClarity: true,
-      checkSync: true 
+      checkSync: true,
     },
     cross: {
       matchAudioToVisual: true,
-      checkLipSync: true
-    }
+      checkLipSync: true,
+    },
   });
   ```
 
@@ -188,6 +182,7 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 - [ ] **Content Coherence Checking**
 
 ### 2.4 AI Tool Call Management
+
 - [ ] **Intelligent Retry System**
 - [ ] **Context Preservation**
 - [ ] **Parallel Execution Optimization**
@@ -196,7 +191,9 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 ## Phase 3: Advanced Self-Healing (Q3 2025)
 
 ### 3.1 Continuous Learning System
+
 - [ ] **ML-Based Optimization**
+
   ```typescript
   timeline
     .enableLearning()
@@ -210,15 +207,18 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 - [ ] **Performance Forecasting**
 
 ### 3.2 Predictive Error Prevention
+
 - [ ] **Risk Assessment**
 - [ ] **Preemptive Corrections**
 - [ ] **Platform-Specific Optimization**
 - [ ] **Resource Usage Prediction**
 
 ### 3.3 Core Primitives Development
+
 - [ ] **Custom Color System**
+
   ```typescript
-  const color = Color.fromDescription('vibrant sunset orange');
+  const color = Color.fromDescription("vibrant sunset orange");
   const contrast = color.suggestContrast();
   const palette = color.generatePalette();
   ```
@@ -230,6 +230,7 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 ## Phase 4: Platform & Integration (Q4 2025)
 
 ### 4.1 Platform-Specific Optimizations
+
 - [ ] **Social Media Deep Integration**
   - Platform-specific algorithms
   - Trend analysis integration
@@ -237,12 +238,14 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
   - Hashtag optimization
 
 ### 4.2 Cloud & Edge Computing
+
 - [ ] **Distributed Processing**
 - [ ] **Edge Rendering**
 - [ ] **Cloud Storage Integration**
 - [ ] **Collaborative Editing**
 
 ### 4.3 Developer Experience
+
 - [ ] **VS Code Extension**
 - [ ] **Interactive Playground**
 - [ ] **Visual Timeline Editor**
@@ -251,12 +254,14 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 ## Phase 5: Autonomous Media Creation (2026)
 
 ### 5.1 Self-Writing SDK
+
 - [ ] **Code Generation from Requirements**
 - [ ] **Automatic API Extension**
 - [ ] **Self-Documentation**
 - [ ] **Automatic Test Generation**
 
 ### 5.2 Complete Autonomy
+
 - [ ] **Zero Human Intervention Mode**
 - [ ] **Self-Deployment**
 - [ ] **Self-Marketing**
@@ -265,6 +270,7 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 ## Implementation Priorities
 
 ### Immediate (Next 2 Weeks)
+
 1. [x] Implement pan/zoom effects ✅
 2. [x] Add comprehensive codec configuration ✅
 3. [ ] Create runtime execution framework
@@ -272,13 +278,15 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 5. [ ] Add streaming support basics
 
 ### Short-term (Next Month)
+
 1. [ ] Multi-modal validation system
-2. [ ] Self-correcting error system
+2. [ ] Self-correcting error system, this should be a self-healing system that can be used to fix errors in the video. it should be optional and only be used if the user wants to.
 3. [ ] Advanced bitrate management
 4. [ ] Filter abstraction layer
 5. [ ] Performance benchmarking
 
 ### Medium-term (Next Quarter)
+
 1. [ ] AI tool call management
 2. [ ] Continuous learning system
 3. [ ] Predictive error prevention
@@ -288,6 +296,7 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 ## Success Metrics
 
 ### Technical Metrics
+
 - Test coverage > 95%
 - Vision validation accuracy > 90%
 - Performance improvement > 50%
@@ -295,6 +304,7 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 - API simplicity score > 9/10
 
 ### User Metrics
+
 - AI agent success rate > 95%
 - Developer satisfaction > 90%
 - Time to first render < 5 seconds
@@ -302,59 +312,12 @@ Create the world's first truly self-healing, AI-native media SDK that continuous
 - Community contributions > 50/month
 
 ### Business Metrics
+
 - SDK adoption rate
 - Enterprise customers
 - Revenue generation
 - Market share
 - Industry recognition
-
-## Research Areas
-
-### Cutting-Edge Technologies
-1. **Neural Video Compression**: AI-based codec development
-2. **Semantic Video Understanding**: Content-aware processing
-3. **Real-time Ray Tracing**: Advanced visual effects
-4. **Quantum Computing**: Future-proof architecture
-5. **Brain-Computer Interfaces**: Direct thought-to-video
-
-### Experimental Features
-1. **Emotion-based Editing**: Adjust based on viewer sentiment
-2. **AI Director Mode**: Autonomous cinematography
-3. **Holographic Output**: 3D video generation
-4. **Telepresence Integration**: Virtual presence
-5. **Dream Visualization**: Abstract concept rendering
-
-## Community & Ecosystem
-
-### Open Source Strategy
-1. **Public Roadmap**: Transparent development
-2. **Community Plugins**: Extensibility framework
-3. **Bounty Program**: Incentivized contributions
-4. **Educational Content**: Tutorials and courses
-5. **Partner Program**: Integration opportunities
-
-### Developer Relations
-1. **Monthly Demos**: Feature showcases
-2. **Office Hours**: Direct support
-3. **Hackathons**: Innovation challenges
-4. **Conference Talks**: Knowledge sharing
-5. **Case Studies**: Success stories
-
-## Risk Mitigation
-
-### Technical Risks
-1. **FFmpeg Dependency**: Build abstraction layer
-2. **Performance Bottlenecks**: Continuous optimization
-3. **Platform Changes**: Adaptive architecture
-4. **Security Vulnerabilities**: Regular audits
-5. **Scalability Issues**: Cloud-first design
-
-### Business Risks
-1. **Competition**: Unique value proposition
-2. **Adoption Barriers**: Excellent documentation
-3. **Pricing Model**: Flexible options
-4. **Support Costs**: Self-service tools
-5. **Technology Shifts**: Modular architecture
 
 ## Conclusion
 
